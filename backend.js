@@ -19,4 +19,4 @@ app.use(cors())
 materia(app, pool)
 frequencia(app, pool)
 
-app.listen(port, () => console.log('Em execução localhost 8080'))
+app.listen(process.env.PORT || port, () => console.log('Em execução localhost 8080'))
