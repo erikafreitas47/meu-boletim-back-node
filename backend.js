@@ -1,7 +1,7 @@
 const express = require('express')
 const app = express()
 const cors = require('cors')
-const port = 8080
+const port = process.env.PORT || 8080
 
 require('dotenv').config()
 
@@ -19,4 +19,4 @@ app.use(cors())
 materia(app, pool)
 frequencia(app, pool)
 
-app.listen(process.env.PORT || port, () => console.log('Em execução localhost 8080'))
+app.listen(port, () => console.log(`Em execução na porta ${port}`));
