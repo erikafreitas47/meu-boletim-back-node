@@ -40,6 +40,7 @@ let endpointFrequencias = (app, pool) => {
                             aluno,
                         }
                     }))
+                    client.release()
                 })
             })
         })
@@ -78,6 +79,7 @@ let endpointFrequencias = (app, pool) => {
                                             erro = true
                                             return res.status(401).send({ msg: 'Não autorizado' })
                                         }
+                                        client.release()
                                     })
                             }
                         })
