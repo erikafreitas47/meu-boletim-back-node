@@ -11,11 +11,19 @@ let endpointTurmas = (app, pool) => {
             client.query('SELECT * FROM turma ORDER BY nome', (error, result) => {
                 if (error) {
                     return res.status(401).send({
-                        mensagem: 'Falha ao concectar no banco',
+                        mensagem: 'Falha ao conectar no banco',
                         error: error.message
                     })
                 }
-                res.status(200).send(result.rows)
+                res.status(200).send(result.rows.map(turma => {
+                    return {
+                        id: turma.id,
+                        nome: turma.nome,
+                        anoLetivo: turma.ano_letivo,
+                        turno: turma.turno,
+                        serie: turma.serie
+                    }
+                }))
                 client.release()
             })
     
@@ -38,7 +46,15 @@ let endpointTurmas = (app, pool) => {
                         error: error.message
                     })
                 }
-                res.status(200).send(result.rows[0])
+                res.status(200).send(result.rows.map(turma =>{
+                    return {
+                        id: turma.id,
+                        nome: turma.nome,
+                        anoLetivo: turma.ano_letivo,
+                        turno: turma.turno,
+                        serie: turma.serie
+                    }
+                }))
                 client.release()
             })
     
