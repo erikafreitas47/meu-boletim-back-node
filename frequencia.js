@@ -13,7 +13,7 @@ let endpointFrequencias = (app, pool) => {
     inner join pessoa p on matricula.id = p.id
     where matricula.turma = $1`
 
-    app.get('/frequencias', (req, res) => {
+    app.get('/buscar-frequencia', (req, res) => {
         pool.connect((err, client) => {
             const { turmaId, materiaId, data } = req.query
             if (!turmaId || !materiaId || !data) {
@@ -45,7 +45,7 @@ let endpointFrequencias = (app, pool) => {
         })
     })
 
-    app.post('/frequencias', (req, res) => {
+    app.post('/salvar-frequencia', (req, res) => {
         const { alunos, materia, dataPres } = req.body
         pool.connect((err, client) => {
             if (err) {
