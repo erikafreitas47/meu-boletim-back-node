@@ -67,7 +67,6 @@ let endpointAtividade = (app, pool) => {
                     const atividade = resultAtiv.rows[0]
                     client.query('select n.id notaId, p.id alunoId, * from nota n inner join pessoa p on n.aluno = p.id where n.atividade = $1',
                         [atividadeId], (err, resultNotas) => {
-                            console.log(resultNotas.rows);
                             if (err) {
                                 return res.status(404).send({ msg: 'Não autorizado' })
                             }
@@ -142,7 +141,6 @@ let endpointAtividade = (app, pool) => {
                             values.push(`($${contador++}, $${contador++}, $${contador++})`)
                             params.push(nota.alunoId, nota.nota, result.rows[0].id)
                         })
-                        console.log(values, params);
                         client.query(`insert into nota(aluno, nota, atividade) values ${values.join(',')}`,
                             params, () => {
                                 res.status(201).send({ msg: 'Salvo com sucesso' })

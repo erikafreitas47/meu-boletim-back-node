@@ -47,46 +47,39 @@ let endpointFrequencias = (app, pool) => {
     })
 
     app.post('/salvar-frequencia', (req, res) => {
-        const { alunos, materia, dataPres } = req.body
+        const { alunos, materiaId, dataPresenca } = req.body
         pool.connect((err, client) => {
             if (err) {
                 return res.status(401).send({ msg: 'Conexão não autorizada' })
             }
-            client.query('select * from materia where id = $1', [materia], (err, result) => {
+            client.query('select * from materia where id = $1', [materiaId], (err, result) => {
                 if (err || !result.rowCount) {
                     return res.status(404).send({ msg: 'Matéria não encontrada' })
                 }
+                const validaPessoa = []
                 alunos.forEach((aluno) => {
-                    let erro = false;
-                    if (!erro) {
-                        client.query('select * from pessoa where id = $1', [aluno.id], (err, result) => {
-                            if (err || !result.rowCount) {
-                                erro = true
-                                return res.status(404).send({ msg: `Aluno ${aluno.id} não encontrado` })
-                            }
-                            if (!aluno.frequenciaId) {
-                                client.query('insert into frequencia(aluno, materia, data_presenca, presenca) values($1, $2, $3, $4)',
-                                    [aluno.id, materia, dataPres, aluno.presenca], (err, result) => {
-                                        if (err) {
-                                            erro = true
-                                            return res.status(401).send({ msg: 'Não autorizado' })
-                                        }
-                                    })
-                            } else {
-                                client.query(`update frequencia set presenca=$1 where id=$2`,
-                                    [aluno.presenca, aluno.frequenciaId], (err, result) => {
-                                        if (err) {
-                                            erro = true
-                                            return res.status(401).send({ msg: 'Não autorizado' })
-                                        }
-                                        client.release()
-                                    })
-                            }
-                        })
-                    }
+                    validaPessoa.push(client.query('select * from pessoa where id = $1', [aluno.id]))
                 })
-                return res.status(201).send({ msg: 'Salvo com sucesso' })
-
+                Promise.all(validaPessoa).then((results) => {
+                    if (results.every((r) => !r.rowCount)) {
+                        client.release()
+                        return res.status(404).send({ msg: `Aluno não encontrado` })
+                    }
+                    const insertUpdate = []
+                    alunos.forEach((aluno) => {
+                        if (!aluno.frequenciaId) {
+                            insertUpdate.push(client.query('insert into frequencia(aluno, materia, data_presenca, presenca) values($1, $2, $3, $4)',
+                                [aluno.id, materiaId, dataPresenca, aluno.presenca]))
+                        } else {
+                            insertUpdate.push(client.query(`update frequencia set presenca=$1 where id=$2`,
+                                [aluno.presenca, aluno.frequenciaId]))
+                        }
+                    })
+                    Promise.all(insertUpdate).then(() => {
+                        client.release()
+                        return res.status(201).send({ msg: 'Salvo com sucesso' })
+                    })
+                })
             })
         })
     })
