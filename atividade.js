@@ -1,3 +1,5 @@
+const {calculoNotas} = require('./calculos')
+
 let endpointAtividade = (app, pool) => {
 
     app.get('/listar-atividades', (req, res) => {
@@ -124,7 +126,7 @@ let endpointAtividade = (app, pool) => {
                         })
                         Promise.all(queries).then(() => {
                             res.status(200).send({ msg: 'Alterado com sucesso' })
-                            client.release()
+                            calculoNotas(client, materiaId, notas.map((n)=> n.alunoId))
                         })
                     })
             } else {
@@ -144,7 +146,7 @@ let endpointAtividade = (app, pool) => {
                         client.query(`insert into nota(aluno, nota, atividade) values ${values.join(',')}`,
                             params, () => {
                                 res.status(201).send({ msg: 'Salvo com sucesso' })
-                                client.release()
+                                calculoNotas(client, materiaId, notas.map((n)=> n.alunoId))
                             })
 
                     })
