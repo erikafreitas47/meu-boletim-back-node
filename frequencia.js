@@ -1,3 +1,4 @@
+const { calculoFrequencias } = require('./calculos')
 let endpointFrequencias = (app, pool) => {
 
     var sqlFrequencia = `select f.id freqId, f.data_presenca, f.presenca, 
@@ -76,8 +77,8 @@ let endpointFrequencias = (app, pool) => {
                         }
                     })
                     Promise.all(insertUpdate).then(() => {
-                        client.release()
-                        return res.status(201).send({ msg: 'Salvo com sucesso' })
+                        res.status(201).send({ msg: 'Salvo com sucesso' })
+                        calculoFrequencias(client, materiaId, alunos.map((a) => a.id))
                     })
                 })
             })
