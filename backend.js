@@ -1,7 +1,8 @@
 const express = require('express')
 const app = express()
 const cors = require('cors')
-const port = process.env.PORT || 8080
+const port = process.env.PORT || 8081
+
 
 require('dotenv').config()
 
@@ -10,6 +11,7 @@ const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL, ssl: { re
 
 var materia = require('./materia')
 var frequencia = require('./frequencia')
+var pessoa = require('./pessoa')
 var atividade = require('./atividade')
 var turma = require('./turma')
 
@@ -20,6 +22,7 @@ app.use(cors())
 
 materia(app, pool)
 frequencia(app, pool)
+pessoa(app, pool)
 atividade(app, pool)
 turma(app, pool)
 
