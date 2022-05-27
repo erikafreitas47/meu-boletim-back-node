@@ -198,6 +198,9 @@ let endpointPessoas = (app, pool) => {
                                 
                             return response.status(200).send({
                                 message: 'Conectado com sucesso',
+                                id: result.rows[0].id,
+                                nome: result.rows[0].nome,
+                                tipoPessoa: result.rows[0].tipo_pessoa,
                                 token: token
                             })
                         }
