@@ -12,6 +12,8 @@ const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL, ssl: { re
 var materia = require('./materia')
 var frequencia = require('./frequencia')
 var pessoa = require('./pessoa')
+var atividade = require('./atividade')
+var turma = require('./turma')
 
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
@@ -21,5 +23,7 @@ app.use(cors())
 materia(app, pool)
 frequencia(app, pool)
 pessoa(app, pool)
+atividade(app, pool)
+turma(app, pool)
 
 app.listen(port, () => console.log(`Em execução na porta ${port}`));
