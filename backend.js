@@ -10,6 +10,7 @@ const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL, ssl: { re
 
 var materia = require('./materia')
 var frequencia = require('./frequencia')
+var configEscola = require('./config-escola')
 var atividade = require('./atividade')
 var turma = require('./turma')
 
@@ -20,6 +21,7 @@ app.use(cors())
 
 materia(app, pool)
 frequencia(app, pool)
+configEscola(app, pool)
 atividade(app, pool)
 turma(app, pool)
 
