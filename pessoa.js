@@ -27,8 +27,6 @@ let endpointPessoas = (app, pool) => {
             sql += ` and ativo = true`; 
         }
 
-        console.log(sql);
-
         try {
             const { rows } = await pool.query(sql, params);
             response.status(200).send(
@@ -51,9 +49,10 @@ let endpointPessoas = (app, pool) => {
             if (err) {
                 return response.status(401).send("Conexão não autorizada.")
             }
-            let sql = `select * from pessoa where id = '${request.params.id}'`
+            let sql = `select * from pessoa where id = $1`
+            let valor = [request.params.id]
     
-            client.query(sql, (error, result) => {
+            client.query(sql, valor, (error, result) => {
                 if (error){
                     return response.status(401).send({msg: "Operação não autorizada.", erro: error.message})
                 }
@@ -61,16 +60,17 @@ let endpointPessoas = (app, pool) => {
                 if (result.rows[0].tipo_pessoa === "ALUNO" || result.rows[0].tipo_pessoa === "PROFESSOR"){
 
                     let sqlAdicional = ""
+                    let valorAdicional = [request.params.id]
 
                     if (result.rows[0].tipo_pessoa === "ALUNO"){
-                       sqlAdicional = `select * from matricula mat where mat.id = '${request.params.id}'`
+                       sqlAdicional = `select * from matricula mat where mat.id = $1`
                     }
                     else if (result.rows[0].tipo_pessoa === "PROFESSOR") {
                         sqlAdicional = `select mate.materia, mate.id as id_professor_materia from professor_materia mate
-                                        where mate.professor = '${request.params.id}'`
+                                        where mate.professor =  $1`
                     }
     
-                    client.query(sqlAdicional, (error2, result2) => {
+                    client.query(sqlAdicional, valorAdicional, (error2, result2) => {
                         if (error2){
                             return response.status(401).send({msg: "Operação não autorizada.", erro: error2.message})
                         }
@@ -131,20 +131,24 @@ let endpointPessoas = (app, pool) => {
                             return response.status(403).send("Operação não permitida.")
                         }                        
                         var sqlCondicao = "";
+                        var valorAdicional 
 
                         if (request.body.tipo_pessoa === "ALUNO"){
-                            var sqlCondicao = `insert into matricula values('${idGerado}', null, '${request.body.responsavel}', '${request.body.turma}', null)`; 
+                            valorAdicional = [idGerado, request.body.responsavel, request.body.turma]
+
+                            var sqlCondicao = `insert into matricula values($1, null, $2, $3, null)`; 
                         }
                         else {
-                            var sqlCondicao = `insert into professor_materia values('${idGerado}', '${request.body.materia}')`;
+                            valorAdicional = [idGerado, request.body.materia]
+                            var sqlCondicao = `insert into professor_materia values($1, $2)`;
                         }
 
-                        client.query(sqlCondicao, (error2, result2) => {
+                        client.query(sqlCondicao, valorAdicional, (error2, result2) => {
                             if (error2) {
                                 return response.status(403).send(
                                     {
                                         msg: "Operação não autorizada.",
-                                        error: error.message
+                                        error: error2.message
                                     }
                                 )
                             }
