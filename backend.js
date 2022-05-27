@@ -3,6 +3,7 @@ const app = express()
 const cors = require('cors')
 const port = process.env.PORT || 8080
 
+
 require('dotenv').config()
 
 var pg = require('pg');
@@ -10,6 +11,7 @@ const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL, ssl: { re
 
 var materia = require('./materia')
 var frequencia = require('./frequencia')
+var pessoa = require('./pessoa')
 
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
@@ -18,5 +20,6 @@ app.use(cors())
 
 materia(app, pool)
 frequencia(app, pool)
+pessoa(app, pool)
 
 app.listen(port, () => console.log(`Em execução na porta ${port}`));
