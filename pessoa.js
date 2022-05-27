@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt')
 const { v4: uuidv4 } = require('uuid')
+var jwt = require("jsonwebtoken");
 
 let endpointPessoas = (app, pool) => {
 
@@ -160,7 +161,58 @@ let endpointPessoas = (app, pool) => {
                 })
             })
         })
-    })   
+    })
+    
+    app.post('/pessoas/login', (request, response) => {
+        pool.connect((err, client) => {
+            if (err) {
+                return response.status(401).send("Conexão não autorizada")
+            }
+    
+            client.query('select * from pessoa where login = $1', [request.body.login], (error, result) => {
+                if (error) {
+                    return response.status(401).send(
+                        {
+                            message: 'Operação não permitida',
+                            error: error.message
+                        }
+                    )
+                }
+    
+                if (result.rowCount > 0) {    
+                    bcrypt.compare(request.body.senha, result.rows[0].senha, (error, results) => {
+                        
+                        if (error) {
+                            return response.status(401).send({
+                                message: "Falha na autenticação"
+                            })
+                        }
+    
+                        if (results) { 
+    
+                            let token = jwt.sign({
+                                    email: result.rows[0].email,
+                                    login: result.rows[0].perfil
+                                },
+                                process.env.JWTKEY, { expiresIn: '1h' })
+                                
+                            return response.status(200).send({
+                                message: 'Conectado com sucesso',
+                                id: result.rows[0].id,
+                                nome: result.rows[0].nome,
+                                tipoPessoa: result.rows[0].tipo_pessoa,
+                                token: token
+                            })
+                        }
+                    })
+                } else {
+                    return response.status(200).send({
+                        message: 'Usuário não encontrado'
+                    })
+                }
+            })
+        })
+    })
 
 }
 
