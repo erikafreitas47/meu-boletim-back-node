@@ -125,10 +125,6 @@ let endpointPessoas = (app, pool) => {
 
                     var valores = [idGerado, request.body.nome, request.body.genero, request.body.datanasc, request.body.cep, request.body.rua, request.body.numero,
                         request.body.bairro, request.body.cidade, request.body.uf, request.body.telefone, request.body.email, request.body.login, hash,
-                                request.body.bairro, request.body.cidade, request.body.uf, request.body.telefone, request.body.email, request.body.login, hash, 
-                        request.body.bairro, request.body.cidade, request.body.uf, request.body.telefone, request.body.email, request.body.login, hash,
-                        request.body.tipo_pessoa, request.body.ativo];
-                                request.body.tipo_pessoa, request.body.ativo];                    
                         request.body.tipo_pessoa, request.body.ativo];
 
                     client.query(sql, valores, (error, result) => {
@@ -199,14 +195,27 @@ let endpointPessoas = (app, pool) => {
                                 login: result.rows[0].perfil
                             },
                                 process.env.JWTKEY, { expiresIn: '1h' })
-                                
-                            return response.status(200).send({
+
+                            const body = {
                                 message: 'Conectado com sucesso',
                                 id: result.rows[0].id,
                                 nome: result.rows[0].nome,
                                 tipoPessoa: result.rows[0].tipo_pessoa,
                                 token: token
-                            })
+                            }
+
+                            if (result.rows[0].tipo_pessoa === "ALUNO") {
+                                client.query(`select t.serie, t.turno, t.nome from matricula m  
+                                 inner join turma t on m.turma = t.id where m.id=$1`,
+                                    [result.rows[0].id], (error, resultTurma) => {
+                                        body.serie = resultTurma.rows[0].serie
+                                        body.turma = resultTurma.rows[0].nome
+                                        body.turno = resultTurma.rows[0].turno
+                                        return response.status(200).send(body)
+                                    })
+                            } else {
+                                return response.status(200).send(body)
+                            }
                         }
                     })
                 } else {
