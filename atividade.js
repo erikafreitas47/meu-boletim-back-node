@@ -107,11 +107,16 @@ let endpointAtividade = (app, pool) => {
     })
 
     app.post('/salvar-atividade', (req, res) => {
+        const { atividadeId, turmaId, dataAtividade, tipoAtividade, materiaId, notas } = req.body
+        const dataAtual = new Date()
+
+        if(dataAtual <= new Date(dataAtividade)){
+            return res.status(400).send({ msg: 'Escolha uma data dentro do intervalo' })
+        }
         pool.connect((err, client) => {
             if (err) {
-                return res.status(401).send({ msg: 'Conexão não autorizada' })
+                return res.status(400).send({ msg: 'Falha na conexão' })
             }
-            const { atividadeId, turmaId, dataAtividade, tipoAtividade, materiaId, notas } = req.body
             if (atividadeId) {
                 client.query(`update atividade set materia=$1, 
                 data_atividade=$2, tipo_atividade=$3, turma=$4 where id=$5`,

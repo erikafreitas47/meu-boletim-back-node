@@ -49,6 +49,11 @@ let endpointFrequencias = (app, pool) => {
 
     app.post('/salvar-frequencia', (req, res) => {
         const { alunos, materiaId, dataPresenca } = req.body
+        const dataAtual = new Date()
+
+        if(dataAtual <= new Date(dataPresenca)){
+            return res.status(400).send({ msg: 'Escolha uma data dentro do intervalo' })}
+
         pool.connect((err, client) => {
             if (err) {
                 return res.status(401).send({ msg: 'Conexão não autorizada' })
