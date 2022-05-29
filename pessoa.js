@@ -14,18 +14,18 @@ let endpointPessoas = (app, pool) => {
                     where true`;
         const params = [];
 
-        if (nome){
+        if (nome) {
             params.push(nome);
-            sql += ` and p.nome like '%' || $${params.length} || '%'`; 
+            sql += ` and p.nome like '%' || $${params.length} || '%'`;
         }
 
-        if (tipo_pessoa){
+        if (tipo_pessoa) {
             params.push(tipo_pessoa);
-            sql += ` and tipo_pessoa = $${params.length}`; 
+            sql += ` and tipo_pessoa = $${params.length}`;
         }
 
-        if (mostrarInativos !== "true"){
-            sql += ` and ativo = true`; 
+        if (mostrarInativos !== "true") {
+            sql += ` and ativo = true`;
         }
 
         try {
@@ -41,48 +41,48 @@ let endpointPessoas = (app, pool) => {
                 })
             )
         } catch (err) {
-            response.status(401).send({msg: "Operação não autorizada!", err: err.message})
+            response.status(401).send({ msg: "Operação não autorizada!", err: err.message })
         }
     })
 
     app.get('/pessoas/:id', (request, response) => {
-        pool.connect((err, client) => {  
+        pool.connect((err, client) => {
             if (err) {
                 return response.status(401).send("Conexão não autorizada.")
             }
             let sql = `select * from pessoa where id = $1`
             let valor = [request.params.id]
-    
+
             client.query(sql, valor, (error, result) => {
-                if (error){
-                    return response.status(401).send({msg: "Operação não autorizada.", erro: error.message})
+                if (error) {
+                    return response.status(401).send({ msg: "Operação não autorizada.", erro: error.message })
                 }
 
-                if (result.rows[0].tipo_pessoa === "ALUNO" || result.rows[0].tipo_pessoa === "PROFESSOR"){
+                if (result.rows[0].tipo_pessoa === "ALUNO" || result.rows[0].tipo_pessoa === "PROFESSOR") {
 
                     let sqlAdicional = ""
                     let valorAdicional = [request.params.id]
 
-                    if (result.rows[0].tipo_pessoa === "ALUNO"){
-                       sqlAdicional = `select * from matricula mat where mat.id = $1`
+                    if (result.rows[0].tipo_pessoa === "ALUNO") {
+                        sqlAdicional = `select * from matricula mat where mat.id = $1`
                     }
                     else if (result.rows[0].tipo_pessoa === "PROFESSOR") {
                         sqlAdicional = `select mate.materia, mate.id as id_professor_materia from professor_materia mate
                                         where mate.professor =  $1`
                     }
-    
+
                     client.query(sqlAdicional, valorAdicional, (error2, result2) => {
-                        if (error2){
-                            return response.status(401).send({msg: "Operação não autorizada.", erro: error2.message})
+                        if (error2) {
+                            return response.status(401).send({ msg: "Operação não autorizada.", erro: error2.message })
                         }
-                        response.json(Object.assign(result.rows[0] , result2.rows[0]))
+                        response.json(Object.assign(result.rows[0], result2.rows[0]))
                         response.status(200).end()
                     })
                 } else {
                     response.json(result.rows[0]);
                     response.status(200).end()
                 }
-                client.release()                                
+                client.release()
             })
         })
     })
@@ -93,7 +93,7 @@ let endpointPessoas = (app, pool) => {
             if (err) {
                 return response.status(401).send("Conexão não permitida.")
             }
-    
+
             client.query('select * from pessoa where email = $1', [request.body.email], (error, result) => {
                 if (error) {
                     return response.status(401).send(
@@ -103,11 +103,11 @@ let endpointPessoas = (app, pool) => {
                         }
                     )
                 }
-    
+
                 if (result.rowCount > 0) {
                     return response.status(200).send("Registro já existe!")
                 }
-    
+
                 bcrypt.hash(request.body.senha, 10, (error, hash) => {
                     if (error) {
                         return response.status(500).send(
@@ -119,25 +119,29 @@ let endpointPessoas = (app, pool) => {
                     }
 
                     const idGerado = uuidv4();
-    
+
                     var sql = `insert into pessoa(id, nome, genero, datanasc, cep, rua, numero, bairro, cidade, uf, telefone, email, login, senha, tipo_pessoa, ativo) 
                                values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`
 
-                    var valores = [idGerado, request.body.nome, request.body.genero, request.body.datanasc, request.body.cep, request.body.rua, request.body.numero, 
+                    var valores = [idGerado, request.body.nome, request.body.genero, request.body.datanasc, request.body.cep, request.body.rua, request.body.numero,
+                        request.body.bairro, request.body.cidade, request.body.uf, request.body.telefone, request.body.email, request.body.login, hash,
                                 request.body.bairro, request.body.cidade, request.body.uf, request.body.telefone, request.body.email, request.body.login, hash, 
+                        request.body.bairro, request.body.cidade, request.body.uf, request.body.telefone, request.body.email, request.body.login, hash,
+                        request.body.tipo_pessoa, request.body.ativo];
                                 request.body.tipo_pessoa, request.body.ativo];                    
-                    
-                    client.query(sql,valores, (error, result) => {
+                        request.body.tipo_pessoa, request.body.ativo];
+
+                    client.query(sql, valores, (error, result) => {
                         if (error) {
                             return response.status(403).send("Operação não permitida.")
-                        }                        
+                        }
                         var sqlCondicao = "";
-                        var valorAdicional 
+                        var valorAdicional
 
-                        if (request.body.tipo_pessoa === "ALUNO"){
+                        if (request.body.tipo_pessoa === "ALUNO") {
                             valorAdicional = [idGerado, request.body.responsavel, request.body.turma]
 
-                            var sqlCondicao = `insert into matricula values($1, null, $2, $3, null)`; 
+                            var sqlCondicao = `insert into matricula values($1, null, $2, $3, null)`;
                         }
                         else {
                             valorAdicional = [idGerado, request.body.materia]
@@ -153,22 +157,22 @@ let endpointPessoas = (app, pool) => {
                                     }
                                 )
                             }
-                             response.status(201).send({mensagem: 'Usuário criado com sucesso!'})
-                        })       
-                        
+                            response.status(201).send({ mensagem: 'Usuário criado com sucesso!' })
+                        })
+
                         client.release()
                     })
                 })
             })
         })
     })
-    
+
     app.post('/pessoas/login', (request, response) => {
         pool.connect((err, client) => {
             if (err) {
                 return response.status(401).send("Conexão não autorizada")
             }
-    
+
             client.query('select * from pessoa where login = $1', [request.body.login], (error, result) => {
                 if (error) {
                     return response.status(401).send(
@@ -178,22 +182,22 @@ let endpointPessoas = (app, pool) => {
                         }
                     )
                 }
-    
-                if (result.rowCount > 0) {    
+
+                if (result.rowCount > 0) {
                     bcrypt.compare(request.body.senha, result.rows[0].senha, (error, results) => {
-                        
+
                         if (error) {
                             return response.status(401).send({
                                 message: "Falha na autenticação"
                             })
                         }
-    
-                        if (results) { 
-    
+
+                        if (results) {
+
                             let token = jwt.sign({
-                                    email: result.rows[0].email,
-                                    login: result.rows[0].perfil
-                                },
+                                email: result.rows[0].email,
+                                login: result.rows[0].perfil
+                            },
                                 process.env.JWTKEY, { expiresIn: '1h' })
                                 
                             return response.status(200).send({
