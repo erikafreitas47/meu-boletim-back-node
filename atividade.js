@@ -1,4 +1,4 @@
-const {calculoNotas} = require('./calculos')
+const { calculoNotas } = require('./calculos')
 
 let endpointAtividade = (app, pool) => {
 
@@ -7,13 +7,15 @@ let endpointAtividade = (app, pool) => {
         if (!turmaId || !materiaId) {
             return res.status(401).send({ msg: 'Informe turma e materia' })
         }
-        pool.connect((err, client) => {
+        pool.connect((err, client, release) => {
             if (err) {
+                release()
                 return res.status(401).send({ msg: 'Conexão não autorizada' })
             }
             client.query(`select * from atividade where materia = $1 and turma = $2`,
                 [materiaId, turmaId], (err, resultAtiv) => {
                     if (err) {
+                        release()
                         return res.status(401).send({ msg: 'Não autorizado' })
                     }
                     res.status(200).send(resultAtiv.rows.map((ativ) => {
@@ -23,7 +25,7 @@ let endpointAtividade = (app, pool) => {
                             tipo: ativ.tipo_atividade
                         }
                     }))
-                    client.release()
+                    release()
                 })
         })
     })
@@ -33,20 +35,22 @@ let endpointAtividade = (app, pool) => {
         if (!atividadeId) {
             return res.status(401).send({ msg: 'Informe atividade' })
         }
-        pool.connect((err, client) => {
+        pool.connect((err, client, release) => {
             if (err) {
                 return res.status(401).send({ msg: 'Conexão não autorizada' })
             }
             client.query('delete from nota where atividade = $1', [atividadeId], (err, result) => {
                 if (err) {
+                    release()
                     return res.status(404).send({ msg: 'Nota não existe' })
                 }
                 client.query('delete from atividade where id = $1', [atividadeId], (err, result) => {
                     if (err) {
+                        release()
                         return res.status(404).send({ msg: 'Atividade não existe' })
                     }
                     res.status(200).send({ msg: 'Excluído com sucesso' })
-                    client.release()
+                    release()
                 })
             })
         })
@@ -57,19 +61,21 @@ let endpointAtividade = (app, pool) => {
         if ((atividadeId && turmaId) || (!atividadeId && !turmaId)) {
             return res.status(401).send({ msg: 'Informe apenas atividade ou apenas turma' })
         }
-        pool.connect((err, client) => {
+        pool.connect((err, client, release) => {
             if (err) {
                 return res.status(401).send({ msg: 'Conexão não autorizada' })
             }
             if (atividadeId) {
                 client.query('select * from atividade where  id = $1', [atividadeId], (err, resultAtiv) => {
                     if (err) {
+                        release()
                         return res.status(404).send({ msg: 'Não autorizado' })
                     }
                     const atividade = resultAtiv.rows[0]
                     client.query('select n.id notaId, p.id alunoId, * from nota n inner join pessoa p on n.aluno = p.id where n.atividade = $1',
                         [atividadeId], (err, resultNotas) => {
                             if (err) {
+                                release()
                                 return res.status(404).send({ msg: 'Não autorizado' })
                             }
                             res.status(200).send({
@@ -84,15 +90,17 @@ let endpointAtividade = (app, pool) => {
                                     }
                                 })
                             })
-                            client.release()
+                            release()
                         })
                 })
             } else {
                 client.query('select p.id alunoId, * from matricula m inner join pessoa p on p.id = m.id where m.turma = $1',
                     [turmaId], (err, result) => {
                         if (err) {
+                            release()
                             return res.status(404).send({ msg: 'Não autorizado' })
                         }
+                        release()
                         return res.status(200).send({
                             turma: { id: turmaId },
                             notas: result.rows.map((n) => {
@@ -110,10 +118,10 @@ let endpointAtividade = (app, pool) => {
         const { atividadeId, turmaId, dataAtividade, tipoAtividade, materiaId, notas } = req.body
         const dataAtual = new Date()
 
-        if(dataAtual <= new Date(dataAtividade)){
+        if (dataAtual <= new Date(dataAtividade)) {
             return res.status(400).send({ msg: 'Escolha uma data dentro do intervalo' })
         }
-        pool.connect((err, client) => {
+        pool.connect((err, client, release) => {
             if (err) {
                 return res.status(400).send({ msg: 'Falha na conexão' })
             }
@@ -122,6 +130,7 @@ let endpointAtividade = (app, pool) => {
                 data_atividade=$2, tipo_atividade=$3, turma=$4 where id=$5`,
                     [materiaId, dataAtividade, tipoAtividade, turmaId, atividadeId], (err, result) => {
                         if (err) {
+                            release()
                             return res.status(401).send({ msg: 'Não foi possível alterar' })
                         }
                         let queries = []
@@ -131,7 +140,7 @@ let endpointAtividade = (app, pool) => {
                         })
                         Promise.all(queries).then(() => {
                             res.status(200).send({ msg: 'Alterado com sucesso' })
-                            calculoNotas(client, materiaId, notas.map((n)=> n.alunoId))
+                            calculoNotas(client, materiaId, notas.map((n) => n.alunoId), release)
                         })
                     })
             } else {
@@ -139,6 +148,7 @@ let endpointAtividade = (app, pool) => {
                     turma) values($1, $2, $3, $4) returning id`,
                     [materiaId, dataAtividade, tipoAtividade, turmaId], (err, result) => {
                         if (err) {
+                            release()
                             return res.status(401).send({ msg: 'Não foi possível inserir' })
                         }
                         let values = []
@@ -151,7 +161,7 @@ let endpointAtividade = (app, pool) => {
                         client.query(`insert into nota(aluno, nota, atividade) values ${values.join(',')}`,
                             params, () => {
                                 res.status(201).send({ msg: 'Salvo com sucesso' })
-                                calculoNotas(client, materiaId, notas.map((n)=> n.alunoId))
+                                calculoNotas(client, materiaId, notas.map((n) => n.alunoId), release)
                             })
 
                     })

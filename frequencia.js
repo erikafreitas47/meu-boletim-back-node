@@ -15,7 +15,7 @@ let endpointFrequencias = (app, pool) => {
     where matricula.turma = $1`
 
     app.get('/buscar-frequencia', (req, res) => {
-        pool.connect((err, client) => {
+        pool.connect((err, client, release) => {
             const { turmaId, materiaId, data } = req.query
             if (!turmaId || !materiaId || !data) {
                 return res.status(401).send({ msg: 'Informe turma, materia e data' })
@@ -26,10 +26,12 @@ let endpointFrequencias = (app, pool) => {
 
             client.query(sqlAlunos, [turmaId], (err, resultAlunos) => {
                 if (err) {
+                    release()
                     return res.status(401).send({ msg: 'Não autorizado' })
                 }
                 client.query(sqlFrequencia, [resultAlunos.rows.map((a) => a.id), data, materiaId], (err, result) => {
                     if (err) {
+                        release()
                         return res.status(401).send({ msg: 'Não autorizado' })
                     }
 
@@ -41,7 +43,7 @@ let endpointFrequencias = (app, pool) => {
                             aluno,
                         }
                     }))
-                    client.release()
+                    release()
                 })
             })
         })
@@ -54,12 +56,13 @@ let endpointFrequencias = (app, pool) => {
         if(dataAtual <= new Date(dataPresenca)){
             return res.status(400).send({ msg: 'Escolha uma data dentro do intervalo' })}
 
-        pool.connect((err, client) => {
+        pool.connect((err, client, release) => {
             if (err) {
                 return res.status(401).send({ msg: 'Conexão não autorizada' })
             }
             client.query('select * from materia where id = $1', [materiaId], (err, result) => {
                 if (err || !result.rowCount) {
+                    release()
                     return res.status(404).send({ msg: 'Matéria não encontrada' })
                 }
                 const validaPessoa = []
@@ -68,7 +71,7 @@ let endpointFrequencias = (app, pool) => {
                 })
                 Promise.all(validaPessoa).then((results) => {
                     if (results.every((r) => !r.rowCount)) {
-                        client.release()
+                        release()
                         return res.status(404).send({ msg: `Aluno não encontrado` })
                     }
                     const insertUpdate = []
@@ -83,7 +86,7 @@ let endpointFrequencias = (app, pool) => {
                     })
                     Promise.all(insertUpdate).then(() => {
                         res.status(201).send({ msg: 'Salvo com sucesso' })
-                        calculoFrequencias(client, materiaId, alunos.map((a) => a.id))
+                        calculoFrequencias(client, materiaId, alunos.map((a) => a.id), release)
                     })
                 })
             })
