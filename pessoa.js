@@ -30,7 +30,6 @@ let endpointPessoas = (app, pool) => {
 
         try {
             const { rows } = await pool.query(sql, params);
-            client.release()
             response.status(200).send(
                 rows.map((p) => {
                     return {
@@ -42,15 +41,13 @@ let endpointPessoas = (app, pool) => {
                 })
             )
         } catch (err) {
-            client.release()
             response.status(401).send({ msg: "Operação não autorizada!", err: err.message })
         }
     })
 
     app.get('/pessoas/:id', (request, response) => {
-        pool.connect((err, client) => {
+        pool.connect((err, client, release) => {
             if (err) {
-                client.release()
                 return response.status(401).send("Conexão não autorizada.")
             }
             let sql = `select * from pessoa where id = $1`
@@ -58,7 +55,7 @@ let endpointPessoas = (app, pool) => {
 
             client.query(sql, valor, (error, result) => {
                 if (error) {
-                    client.release()
+                    release()
                     return response.status(401).send({ msg: "Operação não autorizada.", erro: error.message })
                 }
 
@@ -77,17 +74,17 @@ let endpointPessoas = (app, pool) => {
 
                     client.query(sqlAdicional, valorAdicional, (error2, result2) => {
                         if (error2) {
-                            client.release()
+                            release()
                             return response.status(401).send({ msg: "Operação não autorizada.", erro: error2.message })
                         }
                         response.json(Object.assign(result.rows[0], result2.rows[0]))
                         response.status(200).end()
-                        client.release()
+                        release()
                     })
                 } else {
                     response.json(result.rows[0]);
                     response.status(200).end()
-                    client.release()
+                    release()
                 }
             })
         })
@@ -95,14 +92,14 @@ let endpointPessoas = (app, pool) => {
 
     app.post('/pessoas', (request, response) => {
 
-        pool.connect((err, client) => {
+        pool.connect((err, client, release) => {
             if (err) {
                 return response.status(401).send("Conexão não permitida.")
             }
 
             client.query('select * from pessoa where email = $1', [request.body.email], (error, result) => {
                 if (error) {
-                    client.release()
+                    release()
                     return response.status(401).send(
                         {
                             msg: "Operação não autorizada.",
@@ -112,7 +109,7 @@ let endpointPessoas = (app, pool) => {
                 }
 
                 if (result.rowCount > 0) {
-                    client.release()
+                    release()
                     return response.status(200).send("Registro já existe!")
                 }
 
@@ -137,7 +134,7 @@ let endpointPessoas = (app, pool) => {
 
                     client.query(sql, valores, (error, result) => {
                         if (error) {
-                            client.release()
+                            release()
                             return response.status(403).send("Operação não permitida.")
                         }
                         var sqlCondicao = "";
@@ -155,7 +152,7 @@ let endpointPessoas = (app, pool) => {
 
                         client.query(sqlCondicao, valorAdicional, (error2, result2) => {
                             if (error2) {
-                                client.release()
+                                release()
                                 return response.status(403).send(
                                     {
                                         msg: "Operação não autorizada.",
@@ -164,9 +161,9 @@ let endpointPessoas = (app, pool) => {
                                 )
                             }
                             response.status(201).send({ mensagem: 'Usuário criado com sucesso!' })
+                            release()
                         })
-
-                        client.release()
+                        
                     })
                 })
             })
@@ -174,14 +171,14 @@ let endpointPessoas = (app, pool) => {
     })
 
     app.post('/pessoas/login', (request, response) => {
-        pool.connect((err, client) => {
+        pool.connect((err, client, release) => {
             if (err) {
                 return response.status(401).send("Conexão não autorizada")
             }
 
             client.query('select * from pessoa where login = $1', [request.body.login], (error, result) => {
                 if (error) {
-                    client.release()
+                    release()
                     return response.status(401).send(
                         {
                             message: 'Operação não permitida',
@@ -194,7 +191,7 @@ let endpointPessoas = (app, pool) => {
                     bcrypt.compare(request.body.senha, result.rows[0].senha, (error, results) => {
 
                         if (error) {
-                            client.release()
+                            release()
                             return response.status(401).send({
                                 message: "Falha na autenticação"
                             })
@@ -223,17 +220,17 @@ let endpointPessoas = (app, pool) => {
                                         body.serie = resultTurma.rows[0].serie
                                         body.turma = resultTurma.rows[0].nome
                                         body.turno = resultTurma.rows[0].turno
-                                        client.release()
+                                        release()
                                         return response.status(200).send(body)
                                     })
                             } else {
-                                client.release()
+                                release()
                                 return response.status(200).send(body)
                             }
                         }
                     })
                 } else {
-                    client.release()
+                    release()
                     return response.status(400).send({
                         message: 'Usuário não encontrado'
                     })
