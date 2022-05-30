@@ -33,6 +33,7 @@ let calculoNotas = async (client, materiaId, alunos) => {
 
         axios.post(`${process.env.URL_JAVA}/boletim/nota`, body)
             .then(() => { console.log("Foi enviado para o java:", body) })
+            .catch(()=>{console.error('Erro na conexão com Java', body)})
 
     }
     client.release()
@@ -66,6 +67,7 @@ let calculoFrequencias = async (client, materiaId, alunos) => {
 
         axios.post(`${process.env.URL_JAVA}/boletim/frequencia`, body)
             .then(() => { console.log("Foi enviado para o java:", body) })
+            .catch(()=>{console.error('Erro na conexão com Java', body)})
     }
     client.release()
 }
