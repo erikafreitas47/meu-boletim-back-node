@@ -6,14 +6,12 @@ const filtroB3 = (data, config) => data >= config.inicio_3bimestre && data <= co
 const filtroB4 = (data, config) => data >= config.inicio_4bimestre && data <= config.fim_4bimestre
 
 let calculoNotas = async (client, materiaId, alunos, release) => {
-    console.log("inicio funcao");
     const { rows: [config] } = await client.query("select * from config_escola")
 
     const mapNota = (r) => r.nota
     const calcMedia = (previousV, currentV, index) => previousV + (currentV - previousV) / (index + 1)
 
     for (let aluno of alunos) {
-        console.log("loop aluno", aluno);
         const { rows } = await client.query(`select * from atividade a 
     inner join nota n on a.id = n.atividade 
     where data_atividade between $1 and $2
@@ -36,9 +34,7 @@ let calculoNotas = async (client, materiaId, alunos, release) => {
         axios.post(`${process.env.URL_JAVA}/boletim/nota`, body)
             .then(() => { console.log("Foi enviado para o java:", body) })
             .catch(() => { console.error('Erro na conexão com Java', body) })
-
     }
-    console.log("cliente release nota");
     release()
 }
 
