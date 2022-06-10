@@ -90,6 +90,65 @@ let endpointPessoas = (app, pool) => {
         })
     })
 
+    app.put('/pessoas/:id', (request, response) => {
+        pool.connect((err, client, release) => {
+            if (err) {
+                return response.status(401).send({msg: "Conexão não autorizada.", erro: err.message})
+            }
+
+            let sqlInicial = 'select * from pessoa where id = $1'
+            let valorInicial = [request.params.id]
+
+            client.query(sqlInicial, valorInicial, (erro, result) => {
+                if (erro) {
+                    release()
+                    return response.status(401).send({msg: "Operação não autorizada. 1", erro: erro.message})
+                }
+
+                if (result.rowCount > 0){
+
+                    var sqlUpdate = `update pessoa set nome=$1, genero=$2, datanasc=$3, cep=$4, rua=$5, numero=$6, bairro=$7, 
+                                cidade=$8, uf=$9, telefone=$10, email=$11, login=$12, senha=$13, tipo_pessoa=$14, ativo=$15 
+                                where id=$16`
+                    var valoresUpdate = [request.body.nome, request.body.genero, request.body.datanasc, request.body.cep, request.body.rua, 
+                                    request.body.numero, request.body.bairro, request.body.cidade, request.body.uf, request.body.telefone, 
+                                    request.body.email, request.body.login, request.body.senha, request.body.tipo_pessoa, request.body.ativo, request.params.id];
+                    
+                    client.query(sqlUpdate, valoresUpdate, (error, resultado) => {
+                        if (error){
+                            release()
+                            return response.status(401).send({ msg: "Operaçaõ não autorizada. 2", erro: error.message})
+                        }
+
+                        var sqlCondicao = ""
+                        var valorAdicional
+
+                        if (request.body.tipo_pessoa === "ALUNO") {
+                            valorAdicional = [request.body.responsavel, request.body.turma]
+                            var sqlCondicao = `update matricula set responsavel=$1, turma=$2`;
+                        }
+
+                        if (request.body.tipo_pessoa === "PROFESSOR") {
+                            valorAdicional = [request.body.materia]
+                            var sqlCondicao = `update professor_materia set materia=$1`;
+                        }
+                        client.query(sqlCondicao, valorAdicional, (error2, result2) => {
+                            if (error2) {
+                                release()
+                                return response.status(403).send({ msg: "Operação não autorizada. 3", erro: error2.message})
+                            }
+                            response.status(200).send({ msg: "Registro alterado com sucesso."})
+                            release()                        
+                        })                        
+                    })
+                } else {
+                    release()
+                    response.status(404).send({ msg: "Registro não encontrado."})
+                }
+            })
+        })
+    })
+
     app.post('/pessoas', (request, response) => {
 
         pool.connect((err, client, release) => {
@@ -145,7 +204,7 @@ let endpointPessoas = (app, pool) => {
 
                             var sqlCondicao = `insert into matricula values($1, null, $2, $3, null)`;
                         }
-                        else {
+                        if (request.body.tipo_pessoa === "PROFESSOR") {
                             valorAdicional = [idGerado, request.body.materia]
                             var sqlCondicao = `insert into professor_materia values($1, $2)`;
                         }
