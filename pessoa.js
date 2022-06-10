@@ -36,7 +36,11 @@ let endpointPessoas = (app, pool) => {
                         id: p.pessoaid,
                         nome: p.pessoanome,
                         telefone: p.telefone,
-                        turmas: {} || null
+                        turmas: {
+                            nomeTurma: p.nome,
+                            turno: p.turno,
+                            serie: p.serie,
+                        } || null
                     }
                 })
             )
