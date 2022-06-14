@@ -2,6 +2,8 @@
 let endpointConfigEscola = (app, pool) => {
 
     app.get('/config-escola', async (req, res) => {
+        // #swagger.tags = ['Configurações da escola']
+        //#swagger.summary = 'Retorna uma lista de informações'
         try {
             const { rows: [config] } = await pool.query('select * from config_escola')
             res.status(200).send(
@@ -24,6 +26,8 @@ let endpointConfigEscola = (app, pool) => {
     })
 
     app.post('/config-escola', async (req, res) => {
+        // #swagger.tags = ['Configurações da escola']
+        //#swagger.summary = 'Salva ou atualiza uma lista de informações'
         const { inicioBim1, fimBim1, inicioBim2, fimBim2, inicioBim3, fimBim3, inicioBim4, fimBim4,
             mediaAprovacao, frequenciaAprovacao } = req.body
         if ([inicioBim1, fimBim1, inicioBim2, fimBim2, inicioBim3, fimBim3, inicioBim4, fimBim4,
@@ -52,6 +56,8 @@ let endpointConfigEscola = (app, pool) => {
 
     //TODO transferir endpoint para o arquivo pessoa.js
     app.get('/consultar-filhos', async (req, res) => {
+        // #swagger.tags = ['Pessoas']
+        //#swagger.summary = 'Retorna todos os alunos que estão relacionados a um responsável'
         const { id } = req.query;
         try {
             const { rows } = await pool.query(

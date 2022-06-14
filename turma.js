@@ -1,6 +1,8 @@
 let endpointTurmas = (app, pool) => {
 
     app.get('/turmas', (req, res) => {
+        // #swagger.tags = ['Turmas']
+        //#swagger.summary = 'Retorna uma lista de turmas'
         pool.connect((err, client, release) => {
             if (err) {
                 return res.status(401).send({
@@ -32,6 +34,8 @@ let endpointTurmas = (app, pool) => {
     })
 
     app.get('/turmas/:id', (req, res) => {
+        // #swagger.tags = ['Turmas']
+        //#swagger.summary = 'Procura turma por id'
         pool.connect((err, client, release) => {
             if (err) {
                 return res.status(401).send({
@@ -59,6 +63,8 @@ let endpointTurmas = (app, pool) => {
     })  
     
     app.post('/turmas', (req, res) => {
+        // #swagger.tags = ['Turmas']
+        //#swagger.summary = 'Salva ou edita uma nova turma'
         pool.connect((err, client, release) => {
             if (err){
                 return res.status(401).send({
@@ -112,6 +118,8 @@ let endpointTurmas = (app, pool) => {
     })
 
     app.delete('/turmas/:id', (req, res) => {
+        // #swagger.tags = ['Turmas']
+        //#swagger.summary = 'Deleta uma turma cadastrada'
         pool.connect((err, client, release) => {
             if (err){
                 return res.status(401).send({

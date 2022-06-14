@@ -1,6 +1,8 @@
 let endpointMaterias = (app, pool) => {
 
     app.get('/materias', (req, res) => {
+        // #swagger.tags = ['Matérias']
+        //#swagger.summary = 'Retorna uma lista de matérias'
         pool.connect((err, client, release) => {
             if (err) {
                 return res.status(401).send({ msg: 'Conexão não autorizada' })
@@ -18,6 +20,8 @@ let endpointMaterias = (app, pool) => {
     })
 
     app.get('/materias/:id', (req, res) => {
+        // #swagger.tags = ['Matérias']
+        //#swagger.summary = 'Procura matéria por id'
         pool.connect((err, client, release) => {
             if (err) {
                 return res.status(401).send({ msg: 'Conexão não autorizada' })
@@ -34,6 +38,8 @@ let endpointMaterias = (app, pool) => {
     })
 
     app.post('/materias', (req, res) => {
+        // #swagger.tags = ['Matérias']
+        //#swagger.summary = 'Salva ou edita uma nova matéria'
         pool.connect((err, client, release) => {
             if (err) {
                 return res.status(401).send({ msg: 'Conexão não autorizada' })
@@ -72,6 +78,8 @@ let endpointMaterias = (app, pool) => {
     })
 
     app.delete('/materias/:id', (req, res) => {
+        // #swagger.tags = ['Matérias']
+        //#swagger.summary = 'Deleta uma matéria cadastrada'
         pool.connect((err, client, release) => {
             if (err) {
                 return res.status(401).send({ msg: 'Conexão não autorizada' })
