@@ -3,6 +3,8 @@ const { calculoNotas } = require('./calculos')
 let endpointAtividade = (app, pool) => {
 
     app.get('/listar-atividades', (req, res) => {
+        // #swagger.tags = ['Notas']
+        //#swagger.summary = 'Retorna uma lista de atividades por turma e por matéria'
         const { turmaId, materiaId } = req.query
         if (!turmaId || !materiaId) {
             return res.status(401).send({ msg: 'Informe turma e materia' })
@@ -31,6 +33,8 @@ let endpointAtividade = (app, pool) => {
     })
 
     app.delete('/atividade', (req, res) => {
+        // #swagger.tags = ['Notas']
+        //#swagger.summary = 'Deleta uma nota e após deleta uma atividade'
         const { atividadeId } = req.query
         if (!atividadeId) {
             return res.status(401).send({ msg: 'Informe atividade' })
@@ -57,6 +61,8 @@ let endpointAtividade = (app, pool) => {
     })
 
     app.get('/buscar-nota', (req, res) => {
+        // #swagger.tags = ['Notas']
+        //#swagger.summary = 'Retorna uma lista de notas por turma e por matéria'
         const { atividadeId, turmaId } = req.query
         if ((atividadeId && turmaId) || (!atividadeId && !turmaId)) {
             return res.status(401).send({ msg: 'Informe apenas atividade ou apenas turma' })
@@ -115,6 +121,8 @@ let endpointAtividade = (app, pool) => {
     })
 
     app.post('/salvar-atividade', (req, res) => {
+        // #swagger.tags = ['Notas']
+        //#swagger.summary = 'Salva ou edita uma atividade e após salva ou edita uma nota'
         const { atividadeId, turmaId, dataAtividade, tipoAtividade, materiaId, notas } = req.body
         const dataAtual = new Date()
 

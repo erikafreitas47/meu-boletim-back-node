@@ -15,6 +15,8 @@ let endpointFrequencias = (app, pool) => {
     where matricula.turma = $1`
 
     app.get('/buscar-frequencia', (req, res) => {
+        // #swagger.tags = ['Frequências']
+        //#swagger.summary = 'Retorna uma lista de frequências por turma e por matéria'
         pool.connect((err, client, release) => {
             const { turmaId, materiaId, data } = req.query
             if (!turmaId || !materiaId || !data) {
@@ -50,6 +52,8 @@ let endpointFrequencias = (app, pool) => {
     })
 
     app.post('/salvar-frequencia', (req, res) => {
+        // #swagger.tags = ['Frequências']
+        //#swagger.summary = 'Salva ou edita uma lista de frequências por turma e por matéria'
         const { alunos, materiaId, dataPresenca } = req.body
         const dataAtual = new Date()
 
