@@ -97,7 +97,7 @@ let endpointPessoas = (app, pool) => {
     app.put('/pessoas/:id', (request, response) => {
         pool.connect((err, client, release) => {
             if (err) {
-                return response.status(401).send({msg: "Conexão não autorizada.", erro: err.message})
+                return response.status(401).send({ msg: "Conexão não autorizada.", erro: err.message })
             }
 
             let sqlInicial = 'select * from pessoa where id = $1'
@@ -106,62 +106,101 @@ let endpointPessoas = (app, pool) => {
             client.query(sqlInicial, valorInicial, (erro, result) => {
                 if (erro) {
                     release()
-                    return response.status(401).send({msg: "Operação não autorizada. 1", erro: erro.message})
+                    return response.status(401).send({ msg: "Operação não autorizada. 1", erro: erro.message })
                 }
 
-                if (result.rowCount > 0){
+                if (result.rowCount > 0) {
 
-                    bcrypt.hash(request.body.senha, 10, (error, hash) => {                        
-                        if (error) {
-                            return response.status(500).send({message: "Erro de autenticação.", erro: error.message})
-                        }
-
+                    if (request.body.senha == '') {
                         var sqlUpdate = `update pessoa set nome=$1, genero=$2, datanasc=$3, cep=$4, rua=$5, numero=$6, bairro=$7, 
-                                cidade=$8, uf=$9, telefone=$10, email=$11, login=$12, senha=$13, tipo_pessoa=$14, ativo=$15 
-                                where id=$16`
+                                cidade=$8, uf=$9, telefone=$10, email=$11, login=$12, tipo_pessoa=$13, ativo=$14 
+                                where id=$15`
+                        var valoresUpdate = [request.body.nome, request.body.genero, request.body.datanasc, request.body.cep, request.body.rua,
+                        request.body.numero, request.body.bairro, request.body.cidade, request.body.uf, request.body.telefone,
+                        request.body.email, request.body.login, request.body.tipo_pessoa, request.body.ativo, request.params.id];
 
-                        var valoresUpdate = [request.body.nome, request.body.genero, request.body.datanasc, request.body.cep, request.body.rua, 
-                                    request.body.numero, request.body.bairro, request.body.cidade, request.body.uf, request.body.telefone, 
-                                    request.body.email, request.body.login, hash, request.body.tipo_pessoa, request.body.ativo, request.params.id];
-                        
                         client.query(sqlUpdate, valoresUpdate, (error, resultado) => {
-                
-                            if (error){
+
+                            if (error) {
                                 release()
-                                return response.status(401).send({ msg: "Operaçaõ não autorizada. 2", erro: error.message})
+                                return response.status(401).send({ msg: "Operaçaõ não autorizada. 2", erro: error.message })
                             }
 
                             var sqlCondicao = ""
                             var valorAdicional
 
                             if (request.body.tipo_pessoa === "ALUNO") {
-                                valorAdicional = [request.body.responsavel, request.body.turma]
-                                var sqlCondicao = `update matricula set responsavel=$1, turma=$2`
+                                valorAdicional = [request.body.responsavel, request.body.turma, request.params.id]
+                                var sqlCondicao = `update matricula set responsavel=$1, turma=$2 where id=$3`
                             }
 
                             if (request.body.tipo_pessoa === "PROFESSOR") {
-                                valorAdicional = [request.body.materia]
-                                var sqlCondicao = `update professor_materia set materia=$1`
+                                valorAdicional = [request.body.materia, request.params.id]
+                                var sqlCondicao = `update professor_materia set materia=$1 where professor=$2`
                             }
-                            
+
                             client.query(sqlCondicao, valorAdicional, (error2, result2) => {
                                 if (error2) {
                                     release()
-                                    return response.status(403).send({ msg: "Operação não autorizada. 3", erro: error2.message})
+                                    return response.status(403).send({ msg: "Operação não autorizada. 3", erro: error2.message })
                                 }
-                                response.status(200).send({ msg: "Registro alterado com sucesso."})
-                                release()                        
+                                response.status(200).send({ msg: "Registro alterado com sucesso." })
+                                release()
                             })
                         })
-                    })
+                    } else {
+                        bcrypt.hash(request.body.senha, 10, (error, hash) => {                        
+                            if (error) {
+                                return response.status(500).send({message: "Erro de autenticação.", erro: error.message})
+                            }
+    
+                            var sqlUpdate = `update pessoa set nome=$1, genero=$2, datanasc=$3, cep=$4, rua=$5, numero=$6, bairro=$7, 
+                                    cidade=$8, uf=$9, telefone=$10, email=$11, login=$12, senha=$13, tipo_pessoa=$14, ativo=$15 
+                                    where id=$16`
+    
+                            var valoresUpdate = [request.body.nome, request.body.genero, request.body.datanasc, request.body.cep, request.body.rua, 
+                                        request.body.numero, request.body.bairro, request.body.cidade, request.body.uf, request.body.telefone, 
+                                        request.body.email, request.body.login, hash, request.body.tipo_pessoa, request.body.ativo, request.params.id];
+                            
+                            client.query(sqlUpdate, valoresUpdate, (error, resultado) => {
+                    
+                                if (error){
+                                    release()
+                                    return response.status(401).send({ msg: "Operaçaõ não autorizada. 2", erro: error.message})
+                                }
+    
+                                var sqlCondicao = ""
+                                var valorAdicional
+    
+                                if (request.body.tipo_pessoa === "ALUNO") {
+                                    valorAdicional = [request.body.responsavel, request.body.turma, request.params.id]
+                                    var sqlCondicao = `update matricula set responsavel=$1, turma=$2 where id=$3`
+                                }
+    
+                                if (request.body.tipo_pessoa === "PROFESSOR") {
+                                    valorAdicional = [request.body.materia, request.params.id]
+                                    var sqlCondicao = `update professor_materia set materia=$1 where professor=$2`
+                                }
+                                
+                                client.query(sqlCondicao, valorAdicional, (error2, result2) => {
+                                    if (error2) {
+                                        release()
+                                        return response.status(403).send({ msg: "Operação não autorizada. 3", erro: error2.message})
+                                    }
+                                    response.status(200).send({ msg: "Registro alterado com sucesso."})
+                                    release()                        
+                                })
+                            })
+                        })
+                    }
 
                 } else {
                     release()
-                    response.status(404).send({ msg: "Registro não encontrado."})
+                    response.status(404).send({ msg: "Registro não encontrado." })
                 }
-            })  
+            })
         })
-    })        
+    })
 
     app.post('/pessoas', (request, response) => {
 
@@ -236,7 +275,7 @@ let endpointPessoas = (app, pool) => {
                             response.status(201).send({ mensagem: 'Usuário criado com sucesso!' })
                             release()
                         })
-                        
+
                     })
                 })
             })
