@@ -3,9 +3,8 @@ const app = express()
 const cors = require('cors')
 const port = process.env.PORT || 8081
 
-const swaggerUi = require('swagger-ui-express'),
-    swaggerDocument = require('./swagger.json');
-
+const swaggerUi = require('swagger-ui-express')
+const swaggerFile = require('./swagger_output.json')
 
 require('dotenv').config()
 
@@ -25,7 +24,7 @@ app.use(express.json())
 
 app.use(cors())
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
 materia(app, pool)
 frequencia(app, pool)

@@ -1,0 +1,833 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "REST API",
+    "description": ""
+  },
+  "host": "localhost:3000",
+  "basePath": "/",
+  "schemes": [
+    "http"
+  ],
+  "paths": {
+    "/materias": {
+      "get": {
+        "tags": [
+          "Matérias"
+        ],
+        "summary": "Retorna uma lista de matérias",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Matérias"
+        ],
+        "summary": "Salva ou edita uma nova matéria",
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "nome": {
+                  "example": "any"
+                },
+                "id": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/materias/{id}": {
+      "get": {
+        "tags": [
+          "Matérias"
+        ],
+        "summary": "Procura matéria por id",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Matérias"
+        ],
+        "summary": "Deleta uma matéria cadastrada",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/listar-atividades": {
+      "get": {
+        "tags": [
+          "Notas"
+        ],
+        "summary": "Retorna uma lista de atividades por turma e por matéria",
+        "description": "",
+        "parameters": [
+          {
+            "name": "turmaId",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "materiaId",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/atividade": {
+      "delete": {
+        "tags": [
+          "Notas"
+        ],
+        "summary": "Deleta uma nota e após deleta uma atividade",
+        "description": "",
+        "parameters": [
+          {
+            "name": "atividadeId",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/buscar-nota": {
+      "get": {
+        "tags": [
+          "Notas"
+        ],
+        "summary": "Retorna uma lista de notas por turma e por matéria",
+        "description": "",
+        "parameters": [
+          {
+            "name": "atividadeId",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "turmaId",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/salvar-atividade": {
+      "post": {
+        "tags": [
+          "Notas"
+        ],
+        "summary": "Salva ou edita uma atividade e após salva ou edita uma nota",
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "atividadeId": {
+                  "example": "any"
+                },
+                "turmaId": {
+                  "example": "any"
+                },
+                "dataAtividade": {
+                  "example": "any"
+                },
+                "tipoAtividade": {
+                  "example": "any"
+                },
+                "materiaId": {
+                  "example": "any"
+                },
+                "notas": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/turmas": {
+      "get": {
+        "tags": [
+          "Turmas"
+        ],
+        "summary": "Retorna uma lista de turmas",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Turmas"
+        ],
+        "summary": "Salva ou edita uma nova turma",
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "nome": {
+                  "example": "any"
+                },
+                "ano_letivo": {
+                  "example": "any"
+                },
+                "turno": {
+                  "example": "any"
+                },
+                "serie": {
+                  "example": "any"
+                },
+                "id": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/turmas/{id}": {
+      "get": {
+        "tags": [
+          "Turmas"
+        ],
+        "summary": "Procura turma por id",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Turmas"
+        ],
+        "summary": "Deleta uma turma cadastrada",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/pessoas": {
+      "get": {
+        "tags": [
+          "Pessoas"
+        ],
+        "summary": "Retorna uma lista de pessoa de acordo o tipo",
+        "description": "",
+        "parameters": [
+          {
+            "name": "nome",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "tipo_pessoa",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "mostrarInativos",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Pessoas"
+        ],
+        "summary": "Salva uma pessoa de acordo o tipo criptografando senha",
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "example": "any"
+                },
+                "senha": {
+                  "example": "any"
+                },
+                "nome": {
+                  "example": "any"
+                },
+                "genero": {
+                  "example": "any"
+                },
+                "datanasc": {
+                  "example": "any"
+                },
+                "cep": {
+                  "example": "any"
+                },
+                "rua": {
+                  "example": "any"
+                },
+                "numero": {
+                  "example": "any"
+                },
+                "bairro": {
+                  "example": "any"
+                },
+                "cidade": {
+                  "example": "any"
+                },
+                "uf": {
+                  "example": "any"
+                },
+                "telefone": {
+                  "example": "any"
+                },
+                "login": {
+                  "example": "any"
+                },
+                "tipo_pessoa": {
+                  "example": "any"
+                },
+                "ativo": {
+                  "example": "any"
+                },
+                "responsavel": {
+                  "example": "any"
+                },
+                "turma": {
+                  "example": "any"
+                },
+                "materia": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/pessoas/{id}": {
+      "get": {
+        "tags": [
+          "Pessoas"
+        ],
+        "summary": "Procura pessoa por id e de acordo o tipo",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Pessoas"
+        ],
+        "summary": "Edita uma nova pessoa existente de acordo o tipo",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "senha": {
+                  "example": "any"
+                },
+                "nome": {
+                  "example": "any"
+                },
+                "genero": {
+                  "example": "any"
+                },
+                "datanasc": {
+                  "example": "any"
+                },
+                "cep": {
+                  "example": "any"
+                },
+                "rua": {
+                  "example": "any"
+                },
+                "numero": {
+                  "example": "any"
+                },
+                "bairro": {
+                  "example": "any"
+                },
+                "cidade": {
+                  "example": "any"
+                },
+                "uf": {
+                  "example": "any"
+                },
+                "telefone": {
+                  "example": "any"
+                },
+                "email": {
+                  "example": "any"
+                },
+                "login": {
+                  "example": "any"
+                },
+                "tipo_pessoa": {
+                  "example": "any"
+                },
+                "ativo": {
+                  "example": "any"
+                },
+                "responsavel": {
+                  "example": "any"
+                },
+                "turma": {
+                  "example": "any"
+                },
+                "materia": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/pessoas/login": {
+      "post": {
+        "tags": [
+          "Pessoas"
+        ],
+        "summary": "Autentica usuário",
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "login": {
+                  "example": "any"
+                },
+                "senha": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/buscar-frequencia": {
+      "get": {
+        "tags": [
+          "Frequências"
+        ],
+        "summary": "Retorna uma lista de frequências por turma e por matéria",
+        "description": "",
+        "parameters": [
+          {
+            "name": "turmaId",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "materiaId",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "data",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/salvar-frequencia": {
+      "post": {
+        "tags": [
+          "Frequências"
+        ],
+        "summary": "Salva ou edita uma lista de frequências por turma e por matéria",
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "alunos": {
+                  "example": "any"
+                },
+                "materiaId": {
+                  "example": "any"
+                },
+                "dataPresenca": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/config-escola": {
+      "get": {
+        "tags": [
+          "Configurações da escola"
+        ],
+        "summary": "Retorna uma lista de informações",
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Configurações da escola"
+        ],
+        "summary": "Salva ou atualiza uma lista de informações",
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "inicioBim1": {
+                  "example": "any"
+                },
+                "fimBim1": {
+                  "example": "any"
+                },
+                "inicioBim2": {
+                  "example": "any"
+                },
+                "fimBim2": {
+                  "example": "any"
+                },
+                "inicioBim3": {
+                  "example": "any"
+                },
+                "fimBim3": {
+                  "example": "any"
+                },
+                "inicioBim4": {
+                  "example": "any"
+                },
+                "fimBim4": {
+                  "example": "any"
+                },
+                "mediaAprovacao": {
+                  "example": "any"
+                },
+                "frequenciaAprovacao": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/consultar-filhos": {
+      "get": {
+        "tags": [
+          "Pessoas"
+        ],
+        "summary": "Retorna todos os alunos que estão relacionados a um responsável",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    }
+  }
+}

@@ -4,7 +4,9 @@
   "description": "",
   "main": "backend.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node backend.js",
+    "swagger-autogen": "node swagger.js"
   },
   "dependencies": {
     "axios": "^0.27.2",
@@ -15,6 +17,7 @@
     "jsonwebtoken": "^8.5.1",
     "jwt-decode": "^3.1.2",
     "pg": "^8.7.3",
+    "swagger-autogen": "^2.21.3",
     "swagger-jsdoc": "^6.2.1",
     "swagger-ui-express": "^4.4.0",
     "uuid": "^8.3.2"
