@@ -9,7 +9,7 @@ const endpointTurmas = (app, pool) => {
           error: err.message,
         });
       }
-      client.query('SELECT * FROM turma ORDER BY nome', (error, result) => {
+      return client.query('SELECT * FROM turma ORDER BY nome', (error, result) => {
         if (error) {
           release();
           return res.status(401).send({
@@ -17,14 +17,14 @@ const endpointTurmas = (app, pool) => {
             error: error.message,
           });
         }
-        res.status(200).send(result.rows.map((turma) => ({
+        release();
+        return res.status(200).send(result.rows.map((turma) => ({
           id: turma.id,
           nome: turma.nome,
           anoLetivo: turma.ano_letivo,
           turno: turma.turno,
           serie: turma.serie,
         })));
-        release();
       });
     });
   });
@@ -43,7 +43,7 @@ const endpointTurmas = (app, pool) => {
       const sql = 'select * from turma where id = $1';
       const valor = [req.params.id];
 
-      client.query(sql, valor, (error, result) => {
+      return client.query(sql, valor, (error, result) => {
         if (error) {
           release();
           return res.status(401).send({
@@ -52,14 +52,14 @@ const endpointTurmas = (app, pool) => {
           });
         }
         const turma = result.rows[0];
-        res.status(200).send({
+        release();
+        return res.status(200).send({
           id: turma.id,
           nome: turma.nome,
           anoLetivo: turma.ano_letivo,
           turno: turma.turno,
           serie: turma.serie,
         });
-        release();
       });
     });
   });
@@ -76,11 +76,11 @@ const endpointTurmas = (app, pool) => {
       }
 
       const {
-        nome, ano_letivo, turno, serie, id,
+        nome, ano_letivo: anoLetivo, turno, serie, id,
       } = req.body;
 
       if (id) {
-        client.query('update turma set nome=$1, ano_letivo=$2, turno=$3, serie=$4 where id=$5', [nome, ano_letivo, turno, serie, id], (erro, result) => {
+        return client.query('update turma set nome=$1, ano_letivo=$2, turno=$3, serie=$4 where id=$5', [nome, anoLetivo, turno, serie, id], (erro) => {
           if (erro) {
             release();
             return res.status(401).send({
@@ -88,35 +88,34 @@ const endpointTurmas = (app, pool) => {
               error: erro.message,
             });
           }
-          res.status(200).send({ mensagem: 'Registro alterado com sucesso.' });
           release();
+          return res.status(200).send({ mensagem: 'Registro alterado com sucesso.' });
         });
-      } else {
-        client.query('select * from turma where nome = $1', [nome], (error, results) => {
-          if (error) {
+      }
+      return client.query('select * from turma where nome = $1', [nome], (error, results) => {
+        if (error) {
+          release();
+          return res.status(401).send({
+            mensagem: 'Operação não autorizada.',
+            error: error.message,
+          });
+        }
+        if (results.rowCount > 0) {
+          release();
+          return res.status(403).send({ mensagem: 'Turma já cadastrada.' });
+        }
+        return client.query('insert into turma (nome, ano_letivo, turno, serie) values($1, $2, $3, $4)', [nome, anoLetivo, turno, serie], (error2) => {
+          if (error2) {
             release();
             return res.status(401).send({
               mensagem: 'Operação não autorizada.',
-              error: error.message,
+              error: error2.message,
             });
           }
-          if (results.rowCount > 0) {
-            release();
-            return res.status(403).send({ mensagem: 'Turma já cadastrada.' });
-          }
-          client.query('insert into turma (nome, ano_letivo, turno, serie) values($1, $2, $3, $4)', [nome, ano_letivo, turno, serie], (error2, results2) => {
-            if (error2) {
-              release();
-              return res.status(401).send({
-                mensagem: 'Operação não autorizada.',
-                error: error2.message,
-              });
-            }
-            release();
-            res.status(201).send({ mensagem: 'Dados registrados com sucesso.' });
-          });
+          release();
+          return res.status(201).send({ mensagem: 'Dados registrados com sucesso.' });
         });
-      }
+      });
     });
   });
 
@@ -130,7 +129,7 @@ const endpointTurmas = (app, pool) => {
           erro: err.message,
         });
       }
-      client.query('delete from turma where id = $1', [req.params.id], (erro, result) => {
+      return client.query('delete from turma where id = $1', [req.params.id], (erro) => {
         if (erro) {
           release();
           return res.status(401).send({
@@ -139,7 +138,7 @@ const endpointTurmas = (app, pool) => {
           });
         }
         release();
-        res.status(200).send({ mensagem: 'Registro excluído com sucesso.' });
+        return res.status(200).send({ mensagem: 'Registro excluído com sucesso.' });
       });
     });
   });

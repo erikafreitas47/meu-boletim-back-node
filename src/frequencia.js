@@ -26,27 +26,31 @@ const endpointFrequencias = (app, pool) => {
         return res.status(401).send({ msg: 'Conexão não autorizada' });
       }
 
-      client.query(sqlAlunos, [turmaId], (err, resultAlunos) => {
-        if (err) {
+      return client.query(sqlAlunos, [turmaId], (err2, resultAlunos) => {
+        if (err2) {
           release();
           return res.status(401).send({ msg: 'Não autorizado' });
         }
-        client.query(sqlFrequencia, [resultAlunos.rows.map((a) => a.id), data, materiaId], (err, result) => {
-          if (err) {
-            release();
-            return res.status(401).send({ msg: 'Não autorizado' });
-          }
+        return client.query(
+          sqlFrequencia,
+          [resultAlunos.rows.map((a) => a.id), data, materiaId],
+          (err3, result) => {
+            if (err3) {
+              release();
+              return res.status(401).send({ msg: 'Não autorizado' });
+            }
 
-          res.status(200).send(resultAlunos.rows.map((aluno) => {
-            const { freqid, presenca } = result.rows.find((r) => r.alunoid === aluno.id) || {};
-            return {
-              id: freqid,
-              presenca,
-              aluno,
-            };
-          }));
-          release();
-        });
+            release();
+            return res.status(200).send(resultAlunos.rows.map((aluno) => {
+              const { freqid, presenca } = result.rows.find((r) => r.alunoid === aluno.id) || {};
+              return {
+                id: freqid,
+                presenca,
+                aluno,
+              };
+            }));
+          },
+        );
       });
     });
   });
@@ -61,12 +65,12 @@ const endpointFrequencias = (app, pool) => {
       return res.status(400).send({ msg: 'Escolha uma data dentro do intervalo' });
     }
 
-    pool.connect((err, client, release) => {
+    return pool.connect((err, client, release) => {
       if (err) {
         return res.status(401).send({ msg: 'Conexão não autorizada' });
       }
-      client.query('select * from materia where id = $1', [materiaId], (err, result) => {
-        if (err || !result.rowCount) {
+      return client.query('select * from materia where id = $1', [materiaId], (err2, result) => {
+        if (err2 || !result.rowCount) {
           release();
           return res.status(404).send({ msg: 'Matéria não encontrada' });
         }
@@ -74,7 +78,7 @@ const endpointFrequencias = (app, pool) => {
         alunos.forEach((aluno) => {
           validaPessoa.push(client.query('select * from pessoa where id = $1', [aluno.id]));
         });
-        Promise.all(validaPessoa).then((results) => {
+        return Promise.all(validaPessoa).then((results) => {
           if (results.every((r) => !r.rowCount)) {
             release();
             return res.status(404).send({ msg: 'Aluno não encontrado' });
@@ -93,7 +97,7 @@ const endpointFrequencias = (app, pool) => {
               ));
             }
           });
-          Promise.all(insertUpdate).then(() => {
+          return Promise.all(insertUpdate).then(() => {
             res.status(201).send({ msg: 'Salvo com sucesso' });
             calculoFrequencias(client, materiaId, alunos.map((a) => a.id), release);
           });

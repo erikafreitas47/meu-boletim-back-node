@@ -6,5 +6,5 @@ const endpointsFiles = ['./materia.js', './atividade.js', './turma.js', './pesso
   './frequencia.js', './config-escola.js'];
 
 swaggerAutogen(outputFile, endpointsFiles).then(() => {
-  require('./backend.js');
+  require('./src/backend.js');
 });

@@ -4,7 +4,7 @@ const endpointConfigEscola = (app, pool) => {
     // #swagger.summary = 'Retorna uma lista de informações'
     try {
       const { rows: [config] } = await pool.query('select * from config_escola');
-      res.status(200).send(
+      return res.status(200).send(
         {
           inicioBim1: config.inicio_1bimestre,
           fimBim1: config.fim_1bimestre,
@@ -45,10 +45,9 @@ const endpointConfigEscola = (app, pool) => {
             fim_2bimestre=$4, inicio_3bimestre=$5, fim_3bimestre=$6, inicio_4bimestre=$7, fim_4bimestre=$8, 
             media_aprovacao=$9, frequencia_aprovacao=$10`;
     try {
-      console.log(req.body);
-      const { rows } = await pool.query(sql, [inicioBim1, fimBim1, inicioBim2, fimBim2, inicioBim3,
+      await pool.query(sql, [inicioBim1, fimBim1, inicioBim2, fimBim2, inicioBim3,
         fimBim3, inicioBim4, fimBim4, mediaAprovacao, frequenciaAprovacao]);
-      res.status(201).send({ msg: 'Alterações salvas com sucesso' });
+      return res.status(201).send({ msg: 'Alterações salvas com sucesso' });
     } catch (error) {
       return res.status(401).send({ msg: 'Conexão não autorizada' });
     }
@@ -64,7 +63,7 @@ const endpointConfigEscola = (app, pool) => {
                 inner join pessoa p on p.id = m.id 
                 inner join turma t on t.id = m.turma
                 where m.responsavel = $1`, [id]);
-      res.status(200).send(
+      return res.status(200).send(
         rows.map((f) => ({
           id: f.alunoid,
           nome: f.nomealuno,

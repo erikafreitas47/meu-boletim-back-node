@@ -4,12 +4,12 @@
   "description": "",
   "main": "backend.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node backend.js",
-    "start-dev": "nodemon backend.js",
+    "start": "node src/backend.js",
+    "start-dev": "nodemon src/backend.js",
     "swagger-autogen": "node swagger.js",
-    "lint": "eslint  \"**/*.js\" ",
-    "lint-fix": "npm run lint -- --fix"
+    "lint": "eslint  \"**/src/*.js\" ",
+    "lint-fix": "npm run lint -- --fix",
+    "test": "jest --coverage"
   },
   "dependencies": {
     "axios": "^0.27.2",
@@ -29,6 +29,8 @@
     "eslint": "^8.17.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.26.0",
+    "jest": "^28.1.1",
+    "jest-extended": "^2.0.0",
     "nodemon": "^2.0.16"
   },
   "repository": {

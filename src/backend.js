@@ -2,17 +2,19 @@ const express = require('express');
 
 const app = express();
 const cors = require('cors');
+const pg = require('pg');
 
 const port = process.env.PORT || 8081;
 
 const swaggerUi = require('swagger-ui-express');
-const swaggerFile = require('./swagger_output.json');
+const swaggerFile = require('../swagger_output.json');
 
 require('dotenv').config();
 
-const pg = require('pg');
-
-const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
+const pool = new pg.Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
+});
 
 const materia = require('./materia');
 const frequencia = require('./frequencia');

@@ -6,7 +6,7 @@ const endpointPessoas = (app, pool) => {
   app.get('/pessoas', async (request, response) => {
     // #swagger.tags = ['Pessoas']
     // #swagger.summary = 'Retorna uma lista de pessoa de acordo o tipo'
-    const { nome, tipo_pessoa, mostrarInativos } = request.query;
+    const { nome, tipo_pessoa: tipoPessoa, mostrarInativos } = request.query;
 
     let sql = `select p.id pessoaId, p.nome pessoaNome, * from pessoa p
                     left join matricula m on m.id = p.id
@@ -19,8 +19,8 @@ const endpointPessoas = (app, pool) => {
       sql += ` and p.nome like '%' || $${params.length} || '%'`;
     }
 
-    if (tipo_pessoa) {
-      params.push(tipo_pessoa);
+    if (tipoPessoa) {
+      params.push(tipoPessoa);
       sql += ` and tipo_pessoa = $${params.length}`;
     }
 
@@ -57,7 +57,7 @@ const endpointPessoas = (app, pool) => {
       const sql = 'select * from pessoa where id = $1';
       const valor = [request.params.id];
 
-      client.query(sql, valor, (error, result) => {
+      return client.query(sql, valor, (error, result) => {
         if (error) {
           release();
           return response.status(401).send({ msg: 'Operação não autorizada.', erro: error.message });
@@ -74,20 +74,19 @@ const endpointPessoas = (app, pool) => {
                                         where mate.professor =  $1`;
           }
 
-          client.query(sqlAdicional, valorAdicional, (error2, result2) => {
+          return client.query(sqlAdicional, valorAdicional, (error2, result2) => {
             if (error2) {
               release();
               return response.status(401).send({ msg: 'Operação não autorizada.', erro: error2.message });
             }
-            response.json(Object.assign(result.rows[0], result2.rows[0]));
-            response.status(200).end();
             release();
+            response.json(Object.assign(result.rows[0], result2.rows[0]));
+            return response.status(200).end();
           });
-        } else {
-          response.json(result.rows[0]);
-          response.status(200).end();
-          release();
         }
+        release();
+        response.json(result.rows[0]);
+        return response.status(200).end();
       });
     });
   });
@@ -103,96 +102,127 @@ const endpointPessoas = (app, pool) => {
       const sqlInicial = 'select * from pessoa where id = $1';
       const valorInicial = [request.params.id];
 
-      client.query(sqlInicial, valorInicial, (erro, result) => {
+      return client.query(sqlInicial, valorInicial, (erro, result) => {
         if (erro) {
           release();
           return response.status(401).send({ msg: 'Operação não autorizada. 1', erro: erro.message });
         }
 
         if (result.rowCount > 0) {
-          if (request.body.senha == '') {
+          if (request.body.senha === '') {
             const sqlUpdate = `update pessoa set nome=$1, genero=$2, datanasc=$3, cep=$4, rua=$5, numero=$6, bairro=$7, 
                                 cidade=$8, uf=$9, telefone=$10, email=$11, login=$12, tipo_pessoa=$13, ativo=$14 
                                 where id=$15`;
-            const valoresUpdate = [request.body.nome, request.body.genero, request.body.datanasc, request.body.cep, request.body.rua,
-              request.body.numero, request.body.bairro, request.body.cidade, request.body.uf, request.body.telefone,
-              request.body.email, request.body.login, request.body.tipo_pessoa, request.body.ativo, request.params.id];
+            const valoresUpdate = [
+              request.body.nome,
+              request.body.genero,
+              request.body.datanasc,
+              request.body.cep,
+              request.body.rua,
+              request.body.numero,
+              request.body.bairro,
+              request.body.cidade,
+              request.body.uf,
+              request.body.telefone,
+              request.body.email,
+              request.body.login,
+              request.body.tipo_pessoa,
+              request.body.ativo,
+              request.params.id,
+            ];
 
-            client.query(sqlUpdate, valoresUpdate, (error, resultado) => {
+            return client.query(sqlUpdate, valoresUpdate, (error) => {
               if (error) {
                 release();
-                return response.status(401).send({ msg: 'Operaçaõ não autorizada. 2', erro: error.message });
+                return response.status(401).send({ msg: 'Operação não autorizada. 2', erro: error.message });
               }
 
-              var sqlCondicao = '';
+              let sqlCondicao = '';
               let valorAdicional;
 
               if (request.body.tipo_pessoa === 'ALUNO') {
                 valorAdicional = [request.body.responsavel, request.body.turma, request.params.id];
-                var sqlCondicao = 'update matricula set responsavel=$1, turma=$2 where id=$3';
+                sqlCondicao = 'update matricula set responsavel=$1, turma=$2 where id=$3';
               }
 
               if (request.body.tipo_pessoa === 'PROFESSOR') {
                 valorAdicional = [request.body.materia, request.params.id];
-                var sqlCondicao = 'update professor_materia set materia=$1 where professor=$2';
+                sqlCondicao = 'update professor_materia set materia=$1 where professor=$2';
               }
 
-              client.query(sqlCondicao, valorAdicional, (error2, result2) => {
+              return client.query(sqlCondicao, valorAdicional, (error2) => {
                 if (error2) {
                   release();
                   return response.status(403).send({ msg: 'Operação não autorizada. 3', erro: error2.message });
                 }
-                response.status(200).send({ msg: 'Registro alterado com sucesso.' });
                 release();
-              });
-            });
-          } else {
-            bcrypt.hash(request.body.senha, 10, (error, hash) => {
-              if (error) {
-                return response.status(500).send({ message: 'Erro de autenticação.', erro: error.message });
-              }
-
-              const sqlUpdate = `update pessoa set nome=$1, genero=$2, datanasc=$3, cep=$4, rua=$5, numero=$6, bairro=$7, 
-                                        cidade=$8, uf=$9, telefone=$10, email=$11, login=$12, senha=$13, tipo_pessoa=$14, ativo=$15 
-                                        where id=$16`;
-              const valoresUpdate = [request.body.nome, request.body.genero, request.body.datanasc, request.body.cep, request.body.rua,
-                request.body.numero, request.body.bairro, request.body.cidade, request.body.uf, request.body.telefone,
-                request.body.email, request.body.login, hash, request.body.tipo_pessoa, request.body.ativo, request.params.id];
-
-              client.query(sqlUpdate, valoresUpdate, (error, resultado) => {
-                if (error) {
-                  release();
-                  return response.status(401).send({ msg: 'Operaçaõ não autorizada. 2', erro: error.message });
-                }
-
-                var sqlCondicao = '';
-                let valorAdicional;
-
-                if (request.body.tipo_pessoa === 'ALUNO') {
-                  valorAdicional = [request.body.responsavel, request.body.turma, request.params.id];
-                  var sqlCondicao = 'update matricula set responsavel=$1, turma=$2 where id=$3';
-                }
-
-                if (request.body.tipo_pessoa === 'PROFESSOR') {
-                  valorAdicional = [request.body.materia, request.params.id];
-                  var sqlCondicao = 'update professor_materia set materia=$1 where professor=$2';
-                }
-
-                client.query(sqlCondicao, valorAdicional, (error2, result2) => {
-                  if (error2) {
-                    release();
-                    return response.status(403).send({ msg: 'Operação não autorizada. 3', erro: error2.message });
-                  }
-                  response.status(200).send({ msg: 'Registro alterado com sucesso.' });
-                  release();
-                });
+                return response.status(200).send({ msg: 'Registro alterado com sucesso.' });
               });
             });
           }
-        } else {
-          release();
-          response.status(404).send({ msg: 'Registro não encontrado.' });
+          return bcrypt.hash(request.body.senha, 10, (error, hash) => {
+            if (error) {
+              return response.status(500).send({ message: 'Erro de autenticação.', erro: error.message });
+            }
+
+            const sqlUpdate = `update pessoa set nome=$1, genero=$2, datanasc=$3, cep=$4, rua=$5, numero=$6, bairro=$7, 
+                                        cidade=$8, uf=$9, telefone=$10, email=$11, login=$12, senha=$13, tipo_pessoa=$14, ativo=$15 
+                                        where id=$16`;
+            const valoresUpdate = [
+              request.body.nome,
+              request.body.genero,
+              request.body.datanasc,
+              request.body.cep,
+              request.body.rua,
+              request.body.numero,
+              request.body.bairro,
+              request.body.cidade,
+              request.body.uf,
+              request.body.telefone,
+              request.body.email,
+              request.body.login,
+              hash,
+              request.body.tipo_pessoa,
+              request.body.ativo,
+              request.params.id,
+            ];
+
+            return client.query(sqlUpdate, valoresUpdate, (error3) => {
+              if (error3) {
+                release();
+                return response.status(401).send({ msg: 'Operação não autorizada. 2', erro: error3.message });
+              }
+
+              let sqlCondicao = '';
+              let valorAdicional;
+
+              if (request.body.tipo_pessoa === 'ALUNO') {
+                valorAdicional = [
+                  request.body.responsavel,
+                  request.body.turma,
+                  request.params.id,
+                ];
+                sqlCondicao = 'update matricula set responsavel=$1, turma=$2 where id=$3';
+              }
+
+              if (request.body.tipo_pessoa === 'PROFESSOR') {
+                valorAdicional = [request.body.materia, request.params.id];
+                sqlCondicao = 'update professor_materia set materia=$1 where professor=$2';
+              }
+
+              return client.query(sqlCondicao, valorAdicional, (error2) => {
+                if (error2) {
+                  release();
+                  return response.status(403).send({ msg: 'Operação não autorizada. 3', erro: error2.message });
+                }
+                release();
+                return response.status(200).send({ msg: 'Registro alterado com sucesso.' });
+              });
+            });
+          });
         }
+        release();
+        return response.status(404).send({ msg: 'Registro não encontrado.' });
       });
     });
   });
@@ -205,7 +235,7 @@ const endpointPessoas = (app, pool) => {
         return response.status(401).send('Conexão não permitida.');
       }
 
-      client.query('select * from pessoa where email = $1', [request.body.email], (error, result) => {
+      return client.query('select * from pessoa where email = $1', [request.body.email], (error, result) => {
         if (error) {
           release();
           return response.status(401).send(
@@ -221,12 +251,12 @@ const endpointPessoas = (app, pool) => {
           return response.status(200).send('Registro já existe!');
         }
 
-        bcrypt.hash(request.body.senha, 10, (error, hash) => {
-          if (error) {
+        return bcrypt.hash(request.body.senha, 10, (error2, hash) => {
+          if (error2) {
             return response.status(500).send(
               {
                 message: 'Erro de autenticação.',
-                erro: error.message,
+                erro: error2.message,
               },
             );
           }
@@ -236,40 +266,55 @@ const endpointPessoas = (app, pool) => {
           const sql = `insert into pessoa(id, nome, genero, datanasc, cep, rua, numero, bairro, cidade, uf, telefone, email, login, senha, tipo_pessoa, ativo) 
                                values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`;
 
-          const valores = [idGerado, request.body.nome, request.body.genero, request.body.datanasc, request.body.cep, request.body.rua, request.body.numero,
-            request.body.bairro, request.body.cidade, request.body.uf, request.body.telefone, request.body.email, request.body.login, hash,
-            request.body.tipo_pessoa, request.body.ativo];
+          const valores = [
+            idGerado,
+            request.body.nome,
+            request.body.genero,
+            request.body.datanasc,
+            request.body.cep,
+            request.body.rua,
+            request.body.numero,
+            request.body.bairro,
+            request.body.cidade,
+            request.body.uf,
+            request.body.telefone,
+            request.body.email,
+            request.body.login,
+            hash,
+            request.body.tipo_pessoa,
+            request.body.ativo,
+          ];
 
-          client.query(sql, valores, (error, result) => {
-            if (error) {
+          return client.query(sql, valores, (error3) => {
+            if (error3) {
               release();
               return response.status(403).send('Operação não permitida.');
             }
-            var sqlCondicao = '';
+            let sqlCondicao = '';
             let valorAdicional;
 
             if (request.body.tipo_pessoa === 'ALUNO') {
               valorAdicional = [idGerado, request.body.responsavel, request.body.turma];
 
-              var sqlCondicao = 'insert into matricula values($1, null, $2, $3, null)';
+              sqlCondicao = 'insert into matricula values($1, null, $2, $3, null)';
             }
             if (request.body.tipo_pessoa === 'PROFESSOR') {
               valorAdicional = [idGerado, request.body.materia];
-              var sqlCondicao = 'insert into professor_materia values($1, $2)';
+              sqlCondicao = 'insert into professor_materia values($1, $2)';
             }
 
-            client.query(sqlCondicao, valorAdicional, (error2, result2) => {
-              if (error2) {
+            return client.query(sqlCondicao, valorAdicional, (error4) => {
+              if (error4) {
                 release();
                 return response.status(403).send(
                   {
                     msg: 'Operação não autorizada.',
-                    error: error2.message,
+                    error: error4.message,
                   },
                 );
               }
-              response.status(201).send({ mensagem: 'Usuário criado com sucesso!' });
               release();
+              return response.status(201).send({ mensagem: 'Usuário criado com sucesso!' });
             });
           });
         });
@@ -285,7 +330,7 @@ const endpointPessoas = (app, pool) => {
         return response.status(401).send('Conexão não autorizada');
       }
 
-      client.query('select * from pessoa where login = $1', [request.body.login], (error, result) => {
+      return client.query('select * from pessoa where login = $1', [request.body.login], (error, result) => {
         if (error) {
           release();
           return response.status(401).send(
@@ -297,57 +342,53 @@ const endpointPessoas = (app, pool) => {
         }
 
         if (result.rowCount > 0) {
-          bcrypt.compare(request.body.senha, result.rows[0].senha, (error, results) => {
-            if (error) {
+          return bcrypt.compare(request.body.senha, result.rows[0].senha, (error2, results) => {
+            if (error2 || !results) {
               release();
               return response.status(401).send({
                 message: 'Falha na autenticação',
               });
             }
 
-            if (results) {
-              const token = jwt.sign(
-                {
-                  email: result.rows[0].email,
-                  login: result.rows[0].perfil,
-                },
-                process.env.JWTKEY,
-                { expiresIn: '1h' },
-              );
+            const token = jwt.sign(
+              {
+                email: result.rows[0].email,
+                login: result.rows[0].perfil,
+              },
+              process.env.JWTKEY,
+              { expiresIn: '1h' },
+            );
 
-              const body = {
-                message: 'Conectado com sucesso',
-                id: result.rows[0].id,
-                nome: result.rows[0].nome,
-                tipoPessoa: result.rows[0].tipo_pessoa,
-                token,
-              };
+            const body = {
+              message: 'Conectado com sucesso',
+              id: result.rows[0].id,
+              nome: result.rows[0].nome,
+              tipoPessoa: result.rows[0].tipo_pessoa,
+              token,
+            };
 
-              if (result.rows[0].tipo_pessoa === 'ALUNO') {
-                client.query(
-                  `select t.serie, t.turno, t.nome from matricula m  
+            if (result.rows[0].tipo_pessoa === 'ALUNO') {
+              return client.query(
+                `select t.serie, t.turno, t.nome from matricula m  
                                  inner join turma t on m.turma = t.id where m.id=$1`,
-                  [result.rows[0].id],
-                  (error, resultTurma) => {
-                    body.serie = resultTurma.rows[0].serie;
-                    body.turma = resultTurma.rows[0].nome;
-                    body.turno = resultTurma.rows[0].turno;
-                    release();
-                    return response.status(200).send(body);
-                  },
-                );
-              } else {
-                release();
-                return response.status(200).send(body);
-              }
+                [result.rows[0].id],
+                (_, resultTurma) => {
+                  body.serie = resultTurma.rows[0].serie;
+                  body.turma = resultTurma.rows[0].nome;
+                  body.turno = resultTurma.rows[0].turno;
+                  release();
+                  return response.status(200).send(body);
+                },
+              );
             }
-          });
-        } else {
-          release();
-          return response.status(400).send({
-            message: 'Usuário não encontrado',
+            release();
+            return response.status(200).send(body);
           });
         }
+        release();
+        return response.status(400).send({
+          message: 'Usuário não encontrado',
+        });
       });
     });
   });
