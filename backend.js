@@ -1,37 +1,40 @@
-const express = require('express')
-const app = express()
-const cors = require('cors')
-const port = process.env.PORT || 8081
+const express = require('express');
 
-const swaggerUi = require('swagger-ui-express')
-const swaggerFile = require('./swagger_output.json')
+const app = express();
+const cors = require('cors');
 
-require('dotenv').config()
+const port = process.env.PORT || 8081;
 
-var pg = require('pg');
-const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } })
+const swaggerUi = require('swagger-ui-express');
+const swaggerFile = require('./swagger_output.json');
 
-var materia = require('./materia')
-var frequencia = require('./frequencia')
-var configEscola = require('./config-escola')
-var pessoa = require('./pessoa')
-var atividade = require('./atividade')
-var turma = require('./turma')
-var encriptador = require('./encriptador')
+require('dotenv').config();
 
-app.use(express.urlencoded({ extended: false }))
-app.use(express.json())
+const pg = require('pg');
 
-app.use(cors())
+const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
+
+const materia = require('./materia');
+const frequencia = require('./frequencia');
+const configEscola = require('./config-escola');
+const pessoa = require('./pessoa');
+const atividade = require('./atividade');
+const turma = require('./turma');
+const encriptador = require('./encriptador');
+
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
+
+app.use(cors());
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
-materia(app, pool)
-frequencia(app, pool)
-encriptador(app)
-configEscola(app, pool)
-pessoa(app, pool)
-atividade(app, pool)
-turma(app, pool)
+materia(app, pool);
+frequencia(app, pool);
+encriptador(app);
+configEscola(app, pool);
+pessoa(app, pool);
+atividade(app, pool);
+turma(app, pool);
 
 app.listen(port, () => console.log(`Em execução na porta ${port}`));

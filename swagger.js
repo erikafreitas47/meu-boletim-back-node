@@ -1,10 +1,10 @@
-const swaggerAutogen = require('swagger-autogen')()
+const swaggerAutogen = require('swagger-autogen')();
 
-const outputFile = './swagger_output.json'
+const outputFile = './swagger_output.json';
 
 const endpointsFiles = ['./materia.js', './atividade.js', './turma.js', './pessoa.js',
- './frequencia.js', './config-escola.js']
+  './frequencia.js', './config-escola.js'];
 
 swaggerAutogen(outputFile, endpointsFiles).then(() => {
-    require('./backend.js')
-})
+  require('./backend.js');
+});

@@ -1,12 +1,11 @@
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcrypt');
 
-let encriptador = (app) => {
+const encriptador = (app) => {
+  app.post('/encript', (req, res) => {
+    bcrypt.hash(req.body.text, 10, (error, hash) => {
+      res.status(200).send({ hash });
+    });
+  });
+};
 
-    app.post('/encript', (req, res) =>{
-        bcrypt.hash(req.body.text, 10, (error, hash) => {
-            res.status(200).send({hash})
-        })
-    })
-}
-
-module.exports = encriptador
+module.exports = encriptador;
