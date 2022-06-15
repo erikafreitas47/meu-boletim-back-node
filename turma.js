@@ -55,8 +55,14 @@ let endpointTurmas = (app, pool) => {
                         error: error.message
                     })
                 }
-
-                res.status(200).send(result.rows[0])
+                const turma = result.rows[0]
+                res.status(200).send({ 
+                    id: turma.id,
+                    nome: turma.nome,
+                    anoLetivo: turma.ano_letivo,
+                    turno: turma.turno,
+                    serie: turma.serie
+                })
                 release()
             })
         })
