@@ -52,7 +52,7 @@ const endpointPessoas = (app, pool) => {
     // #swagger.summary = 'Procura pessoa por id e de acordo o tipo'
     pool.connect((err, client, release) => {
       if (err) {
-        return response.status(401).send('Conexão não autorizada.');
+        return response.status(401).send({ msg: 'Conexão não autorizada.' });
       }
       const sql = 'select * from pessoa where id = $1';
       const valor = [request.params.id];
@@ -73,14 +73,13 @@ const endpointPessoas = (app, pool) => {
             sqlAdicional = `select mate.materia, mate.id as id_professor_materia from professor_materia mate
                                         where mate.professor =  $1`;
           }
-
           return client.query(sqlAdicional, valorAdicional, (error2, result2) => {
             if (error2) {
               release();
               return response.status(401).send({ msg: 'Operação não autorizada.', erro: error2.message });
             }
             release();
-            response.json(Object.assign(result.rows[0], result2.rows[0]));
+            response.json({ ...result.rows[0], ...result2.rows[0] });
             return response.status(200).end();
           });
         }
@@ -141,8 +140,14 @@ const endpointPessoas = (app, pool) => {
               let valorAdicional;
 
               if (request.body.tipo_pessoa === 'ALUNO') {
-                valorAdicional = [request.body.responsavel, request.body.turma, request.params.id];
-                sqlCondicao = 'update matricula set responsavel=$1, turma=$2 where id=$3';
+                valorAdicional = [
+                  request.body.nome_mae,
+                  request.body.responsavel,
+                  request.body.turmaSelecionada,
+                  request.body.nome_pai,
+                  request.params.id,
+                ];
+                sqlCondicao = 'update matricula set nome_mae=$1, responsavel=$2, turma=$3, nome_pai=$4 where id=$5';
               }
 
               if (request.body.tipo_pessoa === 'PROFESSOR') {
@@ -162,7 +167,7 @@ const endpointPessoas = (app, pool) => {
           }
           return bcrypt.hash(request.body.senha, 10, (error, hash) => {
             if (error) {
-              return response.status(500).send({ message: 'Erro de autenticação.', erro: error.message });
+              return response.status(500).send({ msg: 'Erro de autenticação.', erro: error.message });
             }
 
             const sqlUpdate = `update pessoa set nome=$1, genero=$2, datanasc=$3, cep=$4, rua=$5, numero=$6, bairro=$7, 
@@ -232,7 +237,7 @@ const endpointPessoas = (app, pool) => {
     // #swagger.summary = 'Salva uma pessoa de acordo o tipo criptografando senha'
     pool.connect((err, client, release) => {
       if (err) {
-        return response.status(401).send('Conexão não permitida.');
+        return response.status(401).send({ msg: 'Conexão não permitida.' });
       }
 
       return client.query('select * from pessoa where email = $1', [request.body.email], (error, result) => {
@@ -248,14 +253,14 @@ const endpointPessoas = (app, pool) => {
 
         if (result.rowCount > 0) {
           release();
-          return response.status(200).send('Registro já existe!');
+          return response.status(400).send({ msg: 'Registro já existe!' });
         }
 
         return bcrypt.hash(request.body.senha, 10, (error2, hash) => {
           if (error2) {
             return response.status(500).send(
               {
-                message: 'Erro de autenticação.',
+                msg: 'Erro de autenticação.',
                 erro: error2.message,
               },
             );
@@ -288,15 +293,21 @@ const endpointPessoas = (app, pool) => {
           return client.query(sql, valores, (error3) => {
             if (error3) {
               release();
-              return response.status(403).send('Operação não permitida.');
+              return response.status(403).send({ msg: 'Operação não permitida.' });
             }
             let sqlCondicao = '';
             let valorAdicional;
 
             if (request.body.tipo_pessoa === 'ALUNO') {
-              valorAdicional = [idGerado, request.body.responsavel, request.body.turma];
+              valorAdicional = [
+                idGerado,
+                request.body.nome_mae,
+                request.body.responsavel,
+                request.body.turmaSelecionada,
+                request.body.nome_pai,
+              ];
 
-              sqlCondicao = 'insert into matricula values($1, null, $2, $3, null)';
+              sqlCondicao = 'insert into matricula(id, nome_mae, responsavel, turma, nome_pai) values($1, $2, $3, $4, $5)';
             }
             if (request.body.tipo_pessoa === 'PROFESSOR') {
               valorAdicional = [idGerado, request.body.materia];
@@ -314,7 +325,7 @@ const endpointPessoas = (app, pool) => {
                 );
               }
               release();
-              return response.status(201).send({ mensagem: 'Usuário criado com sucesso!' });
+              return response.status(201).send({ msg: 'Usuário criado com sucesso!' });
             });
           });
         });
@@ -327,7 +338,7 @@ const endpointPessoas = (app, pool) => {
     // #swagger.summary = 'Autentica usuário'
     pool.connect((err, client, release) => {
       if (err) {
-        return response.status(401).send('Conexão não autorizada');
+        return response.status(401).send({ msg: 'Conexão não autorizada' });
       }
 
       return client.query('select * from pessoa where login = $1', [request.body.login], (error, result) => {
@@ -335,7 +346,7 @@ const endpointPessoas = (app, pool) => {
           release();
           return response.status(401).send(
             {
-              message: 'Operação não permitida',
+              msg: 'Operação não permitida',
               error: error.message,
             },
           );
@@ -346,7 +357,7 @@ const endpointPessoas = (app, pool) => {
             if (error2 || !results) {
               release();
               return response.status(401).send({
-                message: 'Falha na autenticação',
+                msg: 'Falha na autenticação',
               });
             }
 
@@ -360,7 +371,7 @@ const endpointPessoas = (app, pool) => {
             );
 
             const body = {
-              message: 'Conectado com sucesso',
+              msg: 'Conectado com sucesso',
               id: result.rows[0].id,
               nome: result.rows[0].nome,
               tipoPessoa: result.rows[0].tipo_pessoa,
@@ -387,7 +398,7 @@ const endpointPessoas = (app, pool) => {
         }
         release();
         return response.status(400).send({
-          message: 'Usuário não encontrado',
+          msg: 'Usuário não encontrado',
         });
       });
     });

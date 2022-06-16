@@ -5,7 +5,7 @@ const endpointTurmas = (app, pool) => {
     pool.connect((err, client, release) => {
       if (err) {
         return res.status(401).send({
-          mensagem: 'Conexão não autorizada',
+          msg: 'Conexão não autorizada',
           error: err.message,
         });
       }
@@ -13,7 +13,7 @@ const endpointTurmas = (app, pool) => {
         if (error) {
           release();
           return res.status(401).send({
-            mensagem: 'Falha ao conectar no banco',
+            msg: 'Falha ao conectar no banco',
             error: error.message,
           });
         }
@@ -35,7 +35,7 @@ const endpointTurmas = (app, pool) => {
     pool.connect((err, client, release) => {
       if (err) {
         return res.status(401).send({
-          mensagem: 'Conexão não autorizada.',
+          msg: 'Conexão não autorizada.',
           error: err.message,
         });
       }
@@ -47,7 +47,7 @@ const endpointTurmas = (app, pool) => {
         if (error) {
           release();
           return res.status(401).send({
-            mensagem: 'Operação não autorizada.',
+            msg: 'Operação não autorizada.',
             error: error.message,
           });
         }
@@ -70,13 +70,13 @@ const endpointTurmas = (app, pool) => {
     pool.connect((err, client, release) => {
       if (err) {
         return res.status(401).send({
-          mensagem: 'Conexão não autorizada.',
+          msg: 'Conexão não autorizada.',
           error: err.message,
         });
       }
 
       const {
-        nome, ano_letivo: anoLetivo, turno, serie, id,
+        nome, anoLetivo, turno, serie, id,
       } = req.body;
 
       if (id) {
@@ -84,36 +84,36 @@ const endpointTurmas = (app, pool) => {
           if (erro) {
             release();
             return res.status(401).send({
-              mensagem: 'Operação não autorizada',
+              msg: 'Operação não autorizada',
               error: erro.message,
             });
           }
           release();
-          return res.status(200).send({ mensagem: 'Registro alterado com sucesso.' });
+          return res.status(200).send({ msg: 'Registro alterado com sucesso.' });
         });
       }
       return client.query('select * from turma where nome = $1', [nome], (error, results) => {
         if (error) {
           release();
           return res.status(401).send({
-            mensagem: 'Operação não autorizada.',
+            msg: 'Operação não autorizada.',
             error: error.message,
           });
         }
         if (results.rowCount > 0) {
           release();
-          return res.status(403).send({ mensagem: 'Turma já cadastrada.' });
+          return res.status(403).send({ msg: 'Turma já cadastrada.' });
         }
         return client.query('insert into turma (nome, ano_letivo, turno, serie) values($1, $2, $3, $4)', [nome, anoLetivo, turno, serie], (error2) => {
           if (error2) {
             release();
             return res.status(401).send({
-              mensagem: 'Operação não autorizada.',
+              msg: 'Operação não autorizada.',
               error: error2.message,
             });
           }
           release();
-          return res.status(201).send({ mensagem: 'Dados registrados com sucesso.' });
+          return res.status(201).send({ msg: 'Dados registrados com sucesso.' });
         });
       });
     });
@@ -125,7 +125,7 @@ const endpointTurmas = (app, pool) => {
     pool.connect((err, client, release) => {
       if (err) {
         return res.status(401).send({
-          mensagem: 'Conexão não autorizada.',
+          msg: 'Conexão não autorizada.',
           erro: err.message,
         });
       }
@@ -133,12 +133,12 @@ const endpointTurmas = (app, pool) => {
         if (erro) {
           release();
           return res.status(401).send({
-            mensagem: 'Operação não autorizada.',
+            msg: 'Operação não autorizada.',
             erro: erro.message,
           });
         }
         release();
-        return res.status(200).send({ mensagem: 'Registro excluído com sucesso.' });
+        return res.status(200).send({ msg: 'Registro excluído com sucesso.' });
       });
     });
   });
