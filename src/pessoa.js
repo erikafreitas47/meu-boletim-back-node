@@ -15,8 +15,8 @@ const endpointPessoas = (app, pool) => {
     const params = [];
 
     if (nome) {
-      params.push(nome);
-      sql += ` and p.nome like '%' || $${params.length} || '%'`;
+      params.push(nome.toLowerCase());
+      sql += ` and lower(p.nome) like '%' || $${params.length} || '%'`;
     }
 
     if (tipoPessoa) {
