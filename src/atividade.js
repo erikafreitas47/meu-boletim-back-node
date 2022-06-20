@@ -14,7 +14,7 @@ const endpointAtividade = (app, pool) => {
         return res.status(401).send({ msg: 'Conexão não autorizada' });
       }
       return client.query(
-        'select * from atividade where materia = $1 and turma = $2',
+        'select * from atividade where materia = $1 and turma = $2 order by data_atividade desc',
         [materiaId, turmaId],
         (err2, resultAtiv) => {
           if (err2) {
