@@ -133,7 +133,7 @@ const endpointTurmas = (app, pool) => {
         if (erro) {
           release();
           return res.status(401).send({
-            msg: 'Operação não autorizada.',
+            msg: 'Não é possível excluir uma turma que está em uso',
             erro: erro.message,
           });
         }
