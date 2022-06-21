@@ -12,7 +12,7 @@ const endpointFrequencias = (app, pool) => {
 
   const sqlAlunos = `select p.id, p.nome from matricula
     inner join pessoa p on matricula.id = p.id
-    where matricula.turma = $1`;
+    where matricula.turma = $1 order by nome`;
 
   app.get('/buscar-frequencia', (req, res) => {
     // #swagger.tags = ['Frequências']
