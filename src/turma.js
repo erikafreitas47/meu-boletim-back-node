@@ -9,7 +9,7 @@ const endpointTurmas = (app, pool) => {
           error: err.message,
         });
       }
-      return client.query('SELECT * FROM turma ORDER BY nome', (error, result) => {
+      return client.query('SELECT * FROM turma ORDER BY serie, nome', (error, result) => {
         if (error) {
           release();
           return res.status(401).send({
@@ -92,7 +92,7 @@ const endpointTurmas = (app, pool) => {
           return res.status(200).send({ msg: 'Registro alterado com sucesso.' });
         });
       }
-      return client.query('select * from turma where nome = $1', [nome], (error, results) => {
+      return client.query('select * from turma where nome = $1 and ano_letivo = $2 and serie = $3', [nome, anoLetivo, serie], (error, results) => {
         if (error) {
           release();
           return res.status(401).send({

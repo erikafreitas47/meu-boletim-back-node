@@ -6,7 +6,7 @@ const endpointMaterias = (app, pool) => {
       if (err) {
         return res.status(401).send({ msg: 'Conexão não autorizada' });
       }
-      const sql = 'select * from materia';
+      const sql = 'select * from materia order by nome';
       return client.query(sql, (err2, result) => {
         if (err2) {
           release();

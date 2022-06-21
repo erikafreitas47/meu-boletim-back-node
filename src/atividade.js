@@ -102,7 +102,7 @@ const endpointAtividade = (app, pool) => {
         });
       }
       return client.query(
-        'select p.id alunoId, * from matricula m inner join pessoa p on p.id = m.id where m.turma = $1',
+        'select p.id alunoId, * from matricula m inner join pessoa p on p.id = m.id where m.turma = $1 order by nome',
         [turmaId],
         (err3, result) => {
           if (err3) {
