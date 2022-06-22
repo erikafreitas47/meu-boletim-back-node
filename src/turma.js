@@ -1,5 +1,5 @@
 const endpointTurmas = (app, pool) => {
-  app.get('/turmas', (req, res) => {
+  app.get('/turmas', (_req, res) => {
     // #swagger.tags = ['Turmas']
     // #swagger.summary = 'Retorna uma lista de turmas'
     pool.connect((err, client, release) => {

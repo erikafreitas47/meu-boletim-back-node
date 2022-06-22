@@ -1,5 +1,5 @@
 const endpointConfigEscola = (app, pool) => {
-  app.get('/config-escola', async (req, res) => {
+  app.get('/config-escola', async (_req, res) => {
     // #swagger.tags = ['Configurações da escola']
     // #swagger.summary = 'Retorna uma lista de informações'
     try {
@@ -48,30 +48,6 @@ const endpointConfigEscola = (app, pool) => {
       await pool.query(sql, [inicioBim1, fimBim1, inicioBim2, fimBim2, inicioBim3,
         fimBim3, inicioBim4, fimBim4, mediaAprovacao, frequenciaAprovacao]);
       return res.status(201).send({ msg: 'Alterações salvas com sucesso' });
-    } catch (error) {
-      return res.status(401).send({ msg: 'Conexão não autorizada' });
-    }
-  });
-
-  // TODO transferir endpoint para o arquivo pessoa.js
-  app.get('/consultar-filhos', async (req, res) => {
-    // #swagger.tags = ['Pessoas']
-    // #swagger.summary = 'Retorna todos os alunos que estão relacionados a um responsável'
-    const { id } = req.query;
-    try {
-      const { rows } = await pool.query(`select m.id alunoId, p.nome nomeAluno, t.nome turmaNome, t.serie, t.turno from matricula m
-                inner join pessoa p on p.id = m.id 
-                inner join turma t on t.id = m.turma
-                where m.responsavel = $1`, [id]);
-      return res.status(200).send(
-        rows.map((f) => ({
-          id: f.alunoid,
-          nome: f.nomealuno,
-          serie: f.serie,
-          turma: f.turmanome,
-          turno: f.turno,
-        })),
-      );
     } catch (error) {
       return res.status(401).send({ msg: 'Conexão não autorizada' });
     }

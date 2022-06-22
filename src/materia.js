@@ -1,5 +1,5 @@
 const endpointMaterias = (app, pool) => {
-  app.get('/materias', (req, res) => {
+  app.get('/materias', (_req, res) => {
     // #swagger.tags = ['Matérias']
     // #swagger.summary = 'Retorna uma lista de matérias'
     pool.connect((err, client, release) => {

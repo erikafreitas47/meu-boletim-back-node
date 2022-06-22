@@ -403,6 +403,28 @@ const endpointPessoas = (app, pool) => {
       });
     });
   });
+  app.get('/consultar-filhos', async (req, res) => {
+    // #swagger.tags = ['Pessoas']
+    // #swagger.summary = 'Retorna todos os alunos que estão relacionados a um responsável'
+    const { id } = req.query;
+    try {
+      const { rows } = await pool.query(`select m.id alunoId, p.nome nomeAluno, t.nome turmaNome, t.serie, t.turno from matricula m
+                inner join pessoa p on p.id = m.id 
+                inner join turma t on t.id = m.turma
+                where m.responsavel = $1`, [id]);
+      return res.status(200).send(
+        rows.map((f) => ({
+          id: f.alunoid,
+          nome: f.nomealuno,
+          serie: f.serie,
+          turma: f.turmanome,
+          turno: f.turno,
+        })),
+      );
+    } catch (error) {
+      return res.status(401).send({ msg: 'Conexão não autorizada' });
+    }
+  });
 };
 
 module.exports = endpointPessoas;
