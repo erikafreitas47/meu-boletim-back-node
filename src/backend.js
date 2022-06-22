@@ -24,10 +24,14 @@ const atividade = require('./atividade');
 const turma = require('./turma');
 const encriptador = require('./encriptador');
 
+const corsOptions = {
+  origin: `${process.env.URL_ANGULAR}`,
+};
+
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-app.use(cors());
+app.use(cors(corsOptions));
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
