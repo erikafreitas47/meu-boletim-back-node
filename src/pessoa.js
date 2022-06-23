@@ -148,8 +148,8 @@ router.put('/:id', async (request, response) => {
       if (result.rowCount > 0) {
         if (request.body.senha === '') {
           const sqlUpdate = `update pessoa set nome=$1, genero=$2, datanasc=$3, cep=$4, rua=$5, numero=$6, bairro=$7, 
-                                cidade=$8, uf=$9, telefone=$10, email=$11, login=$12, tipo_pessoa=$13, ativo=$14 
-                                where id=$15`;
+                              cidade=$8, uf=$9, telefone=$10, email=$11, login=$12, tipo_pessoa=$13, ativo=$14 
+                              where id=$15`;
           const valoresUpdate = [
             request.body.nome,
             request.body.genero,
@@ -209,8 +209,8 @@ router.put('/:id', async (request, response) => {
           }
 
           const sqlUpdate = `update pessoa set nome=$1, genero=$2, datanasc=$3, cep=$4, rua=$5, numero=$6, bairro=$7, 
-                                        cidade=$8, uf=$9, telefone=$10, email=$11, login=$12, senha=$13, tipo_pessoa=$14, ativo=$15 
-                                        where id=$16`;
+                                      cidade=$8, uf=$9, telefone=$10, email=$11, login=$12, senha=$13, tipo_pessoa=$14, ativo=$15 
+                                      where id=$16`;
           const valoresUpdate = [
             request.body.nome,
             request.body.genero,
