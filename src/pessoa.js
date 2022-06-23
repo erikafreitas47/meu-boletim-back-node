@@ -104,7 +104,7 @@ const endpointPessoas = (app, pool) => {
       return client.query(sqlInicial, valorInicial, (erro, result) => {
         if (erro) {
           release();
-          return response.status(401).send({ msg: 'Operação não autorizada. 1', erro: erro.message });
+          return response.status(401).send({ msg: 'Operação não autorizada.', erro: erro.message });
         }
 
         if (result.rowCount > 0) {
@@ -133,7 +133,7 @@ const endpointPessoas = (app, pool) => {
             return client.query(sqlUpdate, valoresUpdate, (error) => {
               if (error) {
                 release();
-                return response.status(401).send({ msg: 'Operação não autorizada. 2', erro: error.message });
+                return response.status(401).send({ msg: 'Operação não autorizada.', erro: error.message });
               }
 
               let sqlCondicao = '';
@@ -158,7 +158,7 @@ const endpointPessoas = (app, pool) => {
               return client.query(sqlCondicao, valorAdicional, (error2) => {
                 if (error2) {
                   release();
-                  return response.status(403).send({ msg: 'Operação não autorizada. 3', erro: error2.message });
+                  return response.status(403).send({ msg: 'Operação não autorizada.', erro: error2.message });
                 }
                 release();
                 return response.status(200).send({ msg: 'Registro alterado com sucesso.' });
@@ -195,7 +195,7 @@ const endpointPessoas = (app, pool) => {
             return client.query(sqlUpdate, valoresUpdate, (error3) => {
               if (error3) {
                 release();
-                return response.status(401).send({ msg: 'Operação não autorizada. 2', erro: error3.message });
+                return response.status(401).send({ msg: 'Operação não autorizada.', erro: error3.message });
               }
 
               let sqlCondicao = '';
@@ -218,7 +218,7 @@ const endpointPessoas = (app, pool) => {
               return client.query(sqlCondicao, valorAdicional, (error2) => {
                 if (error2) {
                   release();
-                  return response.status(403).send({ msg: 'Operação não autorizada. 3', erro: error2.message });
+                  return response.status(403).send({ msg: 'Operação não autorizada.', erro: error2.message });
                 }
                 release();
                 return response.status(200).send({ msg: 'Registro alterado com sucesso.' });
