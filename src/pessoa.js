@@ -1,7 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const { v4: uuidv4 } = require('uuid');
-const validaLogin = require('./validaLogin');
+const validaLogin = require('./valida-login');
 const pool = require('./pool-connect');
 
 const router = express.Router();

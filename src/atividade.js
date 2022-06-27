@@ -1,7 +1,7 @@
 const express = require('express');
 const { calculoNotas } = require('./calculos');
 
-const validaLogin = require('./validaLogin');
+const validaLogin = require('./valida-login');
 const pool = require('./pool-connect');
 
 const router = express.Router();

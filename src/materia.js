@@ -1,5 +1,5 @@
 const express = require('express');
-const validaLogin = require('./validaLogin');
+const validaLogin = require('./valida-login');
 const pool = require('./pool-connect');
 
 const router = express.Router();
